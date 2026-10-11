@@ -1,0 +1,49 @@
+title,description,tags,category
+"Quarterly planning offsite whiteboard","Photo of a flip chart covered in arrows and boxes left over from a team meeting.","team, offsite, planning",Career
+"Behavioural interview question bank","Screenshot of a running doc with the questions I get asked in interviews and my answers so far.","interviews, prep",Career
+"Feedback chat notes","Notes I scribbled after sitting down with my manager to talk about where I am going next.","manager, one on one, notes",Career
+"Promotion rubric","Screenshot of an internal document that lists what is expected at each level.","internal, levels, expectations",Career
+"Proposal one-pager","Sketch of the single slide I will send to my manager pitching the project I want to run.","proposal, project, pitch",Career
+"Profile draft rewrite","Screenshot of my profile with every bullet point rewritten to actually say what I did.","profile, rewrite, bullets",Career
+"Muted earth tone moodboard","Collage of paper scraps, ceramics and fabric in olive, clay and off-white.","palette, textures, scraps",Design
+"Auto layout misalignment","Screenshot of a design file where the padding is inconsistent across four screens.","spacing, consistency, fix",Design
+"Magazine grid spread","Photo of a printed publication where the columns and baselines are carefully measured.","print, columns, baselines",Design
+"Stationery colour swatches","Photo of a card of painted paper chips in muted shades for a stationery line.","paints, chips, muted",Design
+"Tap target inconsistencies","Photos of three screens where buttons are different sizes despite being the same action.","consistency, sizing, screens",Design
+"Logo mark on tracing paper","Photo of a hand drawn monogram and a few variations penciled on tracing paper.","sketch, variations, monogram",Design
+"What if share had a physical button","A thought scribbled while walking: what if saving something needed an actual button you press.","thought, what if",Ideas
+"Gamifying the habit tracker","Loose notes about turning a boring checklist into something with levels and streaks.","notes, levels, streaks",Ideas
+"Left overs subscription voice memo","Transcript of a rambling voice memo about paying someone to cook from my own fridge contents.","voice memo, leftovers",Ideas
+"Napkin sketch for a fridge inventory","Photo of a napkin with a rough service idea and an arrow pointing at a fridge.","napkin, sketch, service",Ideas
+"House chores as a game","A random thought about awarding points for washing dishes and taking out bins.","thought, points, chores",Ideas
+"Half formed concepts from a walk","List of five app ideas jotted down on a walk, none of them are finished.","list, walk, ideas",Ideas
+"Broken zip on a jacket","Close up photo of a jacket where the zip has separated from the fabric.","jacket, zip, repair",Other
+"Lentil soup recipe","Screenshot of a recipe saved from somewhere with a long list of ingredients.","recipe, soup, ingredients",Other
+"Parking ticket","Photo of a citation slip left on the dashboard.","ticket, fine, dashboard",Other
+"Landlord notice","Screenshot of a notice about boiler repairs taped to the door.","notice, boiler, repairs",Other
+"Cat asleep on the keyboard","Photo of a cat curled across the keyboard in the middle of some work.","cat, keyboard, work",Other
+"Random article on bridges","Screenshot of a long article about how suspension bridges carry load.","bridges, article, engineering",Other
+"Grandmother's recipe cards","Photos of a stack of handwritten index cards with faded ink in an old tin.","family, handwriting, cards",Personal
+"Running log","Screenshot of a running app showing distances and times for the last two months.","running, distances, log",Personal
+"Weekend in the hills","Photos from a short trip with mist over the hills and a small village below.","trip, hills, weekend",Personal
+"Journal entry about quitting","Screenshot of a journal entry about finally stopping a long standing habit.","journal, habit, quitting",Personal
+"Windowsill plants","Photos of about nine potted plants lined up on a south facing windowsill.","plants, windowsill, green",Personal
+"Road trip playlist","Screenshot of a playlist with long drives across it.","playlist, driving, long",Personal
+"Segfault stack trace","Screenshot of a stack trace where the program died inside a library call.","stack trace, crash, library",Programming
+"Debounce snippet","Code snippet I wrote to stop a search box from firing on every keystroke.","snippet, search box, keystrokes",Programming
+"Failing workflow run","Screenshot of an automated build that failed on a step with a cryptic message.","build, step, failed",Programming
+"Why my image is two gigabytes","Notes from an afternoon spent finding out why the built image came out so large.","notes, built, large",Programming
+"Slow query","Screenshot of a query plan showing a scan that takes forty seconds to finish.","query, plan, slow",Programming
+"Missing environment variable","Config file I keep forgetting to add the new setting to before running locally.","config, setting, running",Programming
+"Literature review matrix","Screenshot of a spreadsheet with one row per paper and columns for method and outcome.","spreadsheet, per paper, columns",Research
+"Survey methodology notes","Notes on how a study I read actually recruited its participants and what that rules out.","notes, recruitment, study",Research
+"Meta analysis forest plot","Screenshot of a figure pooling results from many studies into one estimate.","figure, pooled, studies",Research
+"Interview study on remote work","Summary of a paper interviewing a dozen people about working from home.","summary, interviews, remote",Research
+"Annotated paper pages","Photos of journal pages with pencil marks in the margins.","pages, pencil, margins",Research
+"Comparing three competing theories","Notes setting out where three explanations in the same paper disagree.","notes, explanations, disagree",Research
+"Nervous system flashcards","Screenshot of a flashcard deck with spaced repetition stats across the top.","deck, repetition, stats",Study
+"Lecture whiteboard on thermodynamics","Photo of a whiteboard from a lecture with equations and a rough sketch of a piston.","lecture, equations, sketch",Study
+"Past exam paper marked","Screenshot of an old exam paper with my answers ticked and crossed in red.","exam, answers, marked",Study
+"Lecture summary on macroeconomics","Notes summarising a lecture covering growth, inflation and the policy rate.","summary, growth, inflation",Study
+"Lecture slides on the French Revolution","Photos of slides with dates and a map of eighteenth century Europe.","slides, dates, map",Study
+"Revision timetable","Screenshot of a colour coded plan for the last six weeks before exams.","plan, exams, weeks",Study

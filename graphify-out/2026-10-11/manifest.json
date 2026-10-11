@@ -1,0 +1,128 @@
+{
+  ".codex/hooks.json": {
+    "mtime": 1791719221.434563,
+    "seen": 1791719536.420105,
+    "ast_hash": "5ebef3dd159986e465ab65e4014107ec",
+    "semantic_hash": "5ebef3dd159986e465ab65e4014107ec"
+  },
+  "backend/database.py": {
+    "mtime": 1789505137.2772677,
+    "seen": 1791719536.420105,
+    "ast_hash": "fa7fd347583e63baa1906a823e62c3ec",
+    "semantic_hash": "fa7fd347583e63baa1906a823e62c3ec"
+  },
+  "backend/gemini_service.py": {
+    "mtime": 1789561026.1659522,
+    "seen": 1791719536.420105,
+    "ast_hash": "c62854c1a5306e5b8610168d054b72be",
+    "semantic_hash": "c62854c1a5306e5b8610168d054b72be"
+  },
+  "backend/main.py": {
+    "mtime": 1791722791.358536,
+    "seen": 1791722823.380501,
+    "ast_hash": "25a43ef12e2952e4e7b46412a229c43f",
+    "semantic_hash": ""
+  },
+  "backend/models.py": {
+    "mtime": 1789505181.8470733,
+    "seen": 1791719536.420105,
+    "ast_hash": "85944149419d54d7936c3e427faf8226",
+    "semantic_hash": "85944149419d54d7936c3e427faf8226"
+  },
+  "backend/test_gemini.py": {
+    "mtime": 1789558444.5112135,
+    "seen": 1791719536.420105,
+    "ast_hash": "d98a1fb8878d581ef545860f00e5e9e4",
+    "semantic_hash": "d98a1fb8878d581ef545860f00e5e9e4"
+  },
+  "backend/test_pipeline.py": {
+    "mtime": 1789560024.8600938,
+    "seen": 1791719536.420105,
+    "ast_hash": "cfdf8c162655ee2e78008ffcdb39353b",
+    "semantic_hash": "cfdf8c162655ee2e78008ffcdb39353b"
+  },
+  "ml/predict.py": {
+    "mtime": 1790747860.403027,
+    "seen": 1791719536.420105,
+    "ast_hash": "37616f0e4e601c892bb7186812d6a991",
+    "semantic_hash": "37616f0e4e601c892bb7186812d6a991"
+  },
+  "ml/train.py": {
+    "mtime": 1790747860.403027,
+    "seen": 1791719536.420105,
+    "ast_hash": "bea7cd36dee42f30f29a53eaa7c25588",
+    "semantic_hash": "bea7cd36dee42f30f29a53eaa7c25588"
+  },
+  "AGENTS.md": {
+    "mtime": 1791721533.5311315,
+    "seen": 1791722823.380501,
+    "ast_hash": "4e20d5860d794d8d72d193fc0a1c7fb9",
+    "semantic_hash": ""
+  },
+  "backend/AGENTS.md": {
+    "mtime": 1791722209.0342236,
+    "seen": 1791722823.380501,
+    "ast_hash": "887a57b9601999e767e50481e691831b",
+    "semantic_hash": ""
+  },
+  "readme.md": {
+    "mtime": 1791722768.5533056,
+    "seen": 1791722823.380501,
+    "ast_hash": "de2176fce6266702334157d7248e31dd",
+    "semantic_hash": ""
+  },
+  "backend/test_image.jpg": {
+    "mtime": 1776623473.0439427,
+    "seen": 1791719536.420105,
+    "ast_hash": "74b734eb8ee9525551732282723e6a0a",
+    "semantic_hash": "74b734eb8ee9525551732282723e6a0a"
+  },
+  "backend/pyproject.toml": {
+    "mtime": 1791722169.871359,
+    "seen": 1791722823.380501,
+    "ast_hash": "6533d8c184408ab616ff1e70c8d601e2",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_health.py": {
+    "mtime": 1791722747.34085,
+    "seen": 1791722823.380501,
+    "ast_hash": "04943e7823f1deb4413a0bd3c65d7965",
+    "semantic_hash": ""
+  },
+  "ml/legacy/benchmark.py": {
+    "mtime": 1790749077.446142,
+    "seen": 1791722823.380501,
+    "ast_hash": "4166ec6659854c8cdc61be2f7682cdf5",
+    "semantic_hash": ""
+  },
+  "ml/legacy/eval_realistic.py": {
+    "mtime": 1790750533.331615,
+    "seen": 1791722823.380501,
+    "ast_hash": "8d8d7294bc2945f5b00ceddb6e215d96",
+    "semantic_hash": ""
+  },
+  ".github/workflows/backend-ci.yml": {
+    "mtime": 1791722791.7855086,
+    "seen": 1791722823.380501,
+    "ast_hash": "b8be01573da112e893958389de66dd2e",
+    "semantic_hash": ""
+  },
+  "build.md": {
+    "mtime": 1791722201.412747,
+    "seen": 1791722823.380501,
+    "ast_hash": "f43fc5671596c0b7471db35e964307e8",
+    "semantic_hash": ""
+  },
+  "graphify-out/memory/query_20261011_115428_e2b2fcfa_why_does_create_item___connect_the_upload_route_to.md": {
+    "mtime": 1791719668.928143,
+    "seen": 1791722823.380501,
+    "ast_hash": "b69ec9ba7b97cfef12a78ffaf4c05a8e",
+    "semantic_hash": ""
+  },
+  "ml/legacy/README.md": {
+    "mtime": 1791722169.222529,
+    "seen": 1791722823.380501,
+    "ast_hash": "11e7ae70d9c7ec47fd917be843217278",
+    "semantic_hash": ""
+  }
+}
