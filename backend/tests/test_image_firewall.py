@@ -95,8 +95,27 @@ def test_rejects_oversized_edge(tmp_path):
 def test_rejects_pixel_bomb(tmp_path):
     """A tiny file that declares enormous dimensions must not be decoded."""
     settings = _settings(tmp_path, max_image_pixels=100_000)
-    with pytest.raises(UnprocessableImageError):
+    with pytest.raises(UnprocessableImageError) as error:
         sanitize_image(make_image(width=4000, height=4000), settings)
+    assert error.value.code == "too_many_pixels"
+
+
+def test_pixel_limit_uses_stable_error_code(tmp_path):
+    settings = _settings(tmp_path, max_image_pixels=64)
+    with pytest.raises(UnprocessableImageError) as error:
+        sanitize_image(make_image(width=64, height=48), settings)
+    assert error.value.code == "too_many_pixels"
+
+
+def test_strips_trailing_polyglot_payload(tmp_path):
+    """Image-like content with an appended script stays an inert PNG."""
+    polyglot = make_image() + b"\n<html><script>alert('x')</script></html>"
+
+    result = sanitize_image(polyglot, _settings(tmp_path))
+
+    assert result.mime == "image/png"
+    assert b"<script>" not in result.stored_bytes
+    assert Image.open(io.BytesIO(result.stored_bytes)).format == "PNG"
 
 
 def test_strips_exif_metadata(tmp_path):
@@ -115,6 +134,26 @@ def test_strips_exif_metadata(tmp_path):
     assert stored.getexif().get(0x0110) is None
     assert "exif" not in stored.info
     assert b"Exif" not in result.stored_bytes
+
+
+def test_strips_exif_gps_metadata(tmp_path):
+    buffer = io.BytesIO()
+    image = Image.new("RGB", (32, 32), (5, 5, 5))
+    exif = Image.Exif()
+    exif[0x8825] = {
+        1: "N",
+        2: (37, 46, 29),
+        3: "W",
+        4: (122, 25, 9),
+    }
+    image.save(buffer, format="JPEG", exif=exif)
+    source = Image.open(io.BytesIO(buffer.getvalue()))
+    assert source.getexif().get_ifd(0x8825)[1] == "N"
+
+    result = sanitize_image(buffer.getvalue(), _settings(tmp_path))
+    stored = Image.open(io.BytesIO(result.stored_bytes))
+    assert stored.getexif().get_ifd(0x8825) == {}
+    assert b"GPS" not in result.stored_bytes
 
 
 def test_pixel_hash_is_stable_across_reencodes(tmp_path):

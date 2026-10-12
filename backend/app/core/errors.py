@@ -41,6 +41,24 @@ class BadRequestError(AppError):
     message = "The request could not be processed."
 
 
+class AuthenticationError(AppError):
+    code = "unauthorized"
+    status_code = 401
+    message = "Authentication is required."
+
+
+class RateLimitError(AppError):
+    code = "rate_limited"
+    status_code = 429
+    message = "Too many requests. Please try again later."
+
+
+class ConflictError(AppError):
+    code = "conflict"
+    status_code = 409
+    message = "The item cannot be changed in its current state."
+
+
 class NotFoundError(AppError):
     code = "not_found"
     status_code = 404
@@ -63,6 +81,11 @@ class UnprocessableImageError(AppError):
     code = "corrupt_image"
     status_code = 422
     message = "The uploaded image could not be processed."
+
+
+class TooManyPixelsError(UnprocessableImageError):
+    code = "too_many_pixels"
+    message = "The uploaded image exceeds the allowed dimensions."
 
 
 class AnimatedImageError(UnprocessableImageError):

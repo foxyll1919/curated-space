@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import Settings
 from app.main import create_app
+from tests.conftest import FakeClassifier
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -27,9 +28,12 @@ def _migrate(database_path: Path) -> None:
 def test_readiness_checks_schema_and_storage(tmp_path):
     database_path = tmp_path / "db" / "test.db"
     storage_path = tmp_path / "uploads"
-    app = create_app(Settings(database_path=database_path, storage_path=storage_path))
+    app = create_app(
+        Settings(database_path=database_path, storage_path=storage_path, api_key="test-api-key"),
+        classifier=FakeClassifier(),
+    )
 
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-API-Key": "test-api-key"}) as client:
         health = client.get("/api/v1/health")
         not_ready = client.get("/api/v1/ready")
 
@@ -47,8 +51,9 @@ def test_readiness_checks_schema_and_storage(tmp_path):
         "components": {
             "database": "ok",
             "storage": "ok",
-            "classifier": "deferred_until_milestone_4",
+            "classifier": "ok",
             "extractor": "ok",
+            "api_auth": "ok",
         },
     }
     assert storage_path.is_dir()
@@ -103,6 +108,7 @@ def test_migration_preserves_legacy_item_fields(tmp_path):
     assert item["labels"] == '{"category": "Research"}'
     assert item["status"] == "ready"
     assert item["classifier_score"] is None
+    assert item["owner_id"] == "legacy-owner"
     assert {row[0] for row in tables} >= {"items", "analysis_cache", "llm_usage"}
     assert "items_legacy" not in {row[0] for row in tables}
 

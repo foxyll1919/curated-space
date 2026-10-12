@@ -1,0 +1,61 @@
+{
+  "_comment": [
+    "Checked-in Gemini price table. Milestone 6 replaced the placeholder prices",
+    "that build.md carried with figures that had never been verified.",
+    "",
+    "verified_on/source record when these numbers were read and from where.",
+    "Re-verify before trusting a cost estimate, and bump verified_on when you do.",
+    "",
+    "All figures are USD per 1M tokens, Standard tier, Paid tier. 'output' is",
+    "Google's 'Output price (including thinking tokens)', so thinking tokens are",
+    "billed at the output rate and MUST NOT be added on top of it again.",
+    "",
+    "gemini-3.5-flash and gemini-3.7-flash are deliberately absent: neither has",
+    "a section on the pricing page as of verified_on. Do not add them from a",
+    "third-party aggregator; if a model is missing here, the cost estimate is",
+    "unknown rather than free."
+  ],
+  "verified_on": "2026-10-11",
+  "source": "https://aistudio.google.com/docs/pricing",
+  "tier": "paid",
+  "output_includes_thinking_tokens": true,
+  "storage_usd_per_mtok_hour": 1.0,
+  "models": {
+    "gemini-3.5-flash-lite": {
+      "input_usd_per_mtok": 0.3,
+      "output_usd_per_mtok": 2.5,
+      "cached_input_usd_per_mtok": 0.03,
+      "note": "Current default. Free tier is free of charge but content is used to improve Google products."
+    },
+    "gemini-3.1-flash-lite": {
+      "input_usd_per_mtok": 0.25,
+      "output_usd_per_mtok": 1.5,
+      "cached_input_usd_per_mtok": 0.025,
+      "note": "Cheaper than 3.5-flash-lite on both directions."
+    },
+    "gemini-2.5-flash-lite": {
+      "input_usd_per_mtok": 0.1,
+      "output_usd_per_mtok": 0.4,
+      "cached_input_usd_per_mtok": 0.01,
+      "note": "Cheapest listed. M2-era model; check for a shutdown date before adopting it."
+    },
+    "gemini-3.6-flash": {
+      "input_usd_per_mtok": 0.75,
+      "output_usd_per_mtok": 3.75,
+      "cached_input_usd_per_mtok": 0.075,
+      "input_usd_per_mtok_from_2027_01_01": 1.5,
+      "output_usd_per_mtok_from_2027_01_01": 7.5,
+      "cached_input_usd_per_mtok_from_2027_01_01": 0.15,
+      "note": "Introductory pricing doubles on 2027-01-01; the *_from_2027_01_01 fields are recorded so a budget that crosses that date is not wrong by 2x."
+    },
+    "gemini-3.8-flash": {
+      "input_usd_per_mtok": 0.75,
+      "output_usd_per_mtok": 3.75,
+      "cached_input_usd_per_mtok": 0.075,
+      "input_usd_per_mtok_from_2027_01_01": 1.5,
+      "output_usd_per_mtok_from_2027_01_01": 7.5,
+      "cached_input_usd_per_mtok_from_2027_01_01": 0.15,
+      "note": "Introductory pricing doubles on 2027-01-01."
+    }
+  }
+}

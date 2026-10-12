@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;450;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Curated Space is an archival contact sheet. The chrome is deliberately
+  achromatic so that saved screenshots carry every bit of colour on screen.
+  Cobalt is the only interactive accent; status is the only other place a
+  colour appears, and it is always paired with a text label so colour is
+  never the sole carrier of meaning.
+*/
+:root {
+  --radius: 0.375rem;
+
+  /* Paper and ink */
+  --background: #f2f2f1;
+  --foreground: #17181a;
+  --card: #fafaf9;
+  --card-foreground: #17181a;
+  --popover: #fafaf9;
+  --popover-foreground: #17181a;
+
+  /* Chrome */
+  --secondary: #e8e8e6;
+  --secondary-foreground: #2b2c2f;
+  --muted: #e9e9e7;
+  --muted-foreground: #63656a;
+  --accent: #e6e6e3;
+  --accent-foreground: #17181a;
+
+  /* Interactive: the single accent. Ink buttons, cobalt focus. */
+  --primary: #17181a;
+  --primary-foreground: #f7f7f6;
+  --ring: #3e63dd;
+
+  --destructive: #c43b2e;
+  --destructive-foreground: #fdf7f6;
+
+  /* A hairline, not a card border. */
+  --border: #dcdcd8;
+  --input: #cfcfca;
+
+  /* Semantic status, consumed by components/StatusChip. Never a percentage. */
+  --status-failed: #b33125;
+  --status-deferred: #4f6187;
+  --status-pending: #6c6e72;
+}
+
+.dark {
+  --background: #101112;
+  --foreground: #ecedee;
+  --card: #17181a;
+  --card-foreground: #ecedee;
+  --popover: #17181a;
+  --popover-foreground: #ecedee;
+
+  --secondary: #232528;
+  --secondary-foreground: #dfe0e2;
+  --muted: #1e2022;
+  --muted-foreground: #93969b;
+  --accent: #26282b;
+  --accent-foreground: #ecedee;
+
+  --primary: #ecedee;
+  --primary-foreground: #141517;
+  --ring: #7b95f2;
+
+  --destructive: #e06a5d;
+  --destructive-foreground: #1a0f0e;
+
+  --border: #2a2c30;
+  --input: #35383c;
+
+  --status-failed: #e8897c;
+  --status-deferred: #93a5c9;
+  --status-pending: #8b8e93;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-failed: var(--status-failed);
+  --color-status-deferred: var(--status-deferred);
+  --color-status-pending: var(--status-pending);
+
+  /*
+    One family for the machinery (chrome, controls, metadata) and one for the
+    content. Titles are the only serif, because a title is something a person
+    reads, not something the app operates with.
+  */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* 4px base register. */
+  --spacing: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'cv05', 'ss01';
+  }
+
+  /* Focus is the accent, and it is always visible. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+@layer components {
+  /* Pending and processing items show a slow sweep, not a spinner. */
+  .cs-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in oklab, var(--foreground) 8%, transparent) 45%,
+      transparent 70%
+    );
+    background-size: 220% 100%;
+    animation: cs-shimmer 2.4s linear infinite;
+  }
+}
+
+@keyframes cs-shimmer {
+  from {
+    background-position: 140% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -5,6 +5,20 @@
 # Local databases and uploaded user images
 *.db
 backend/uploads/
+backend/.evals-reports/
+
+# The owner's screenshot set. These are real, personal images kept out of the
+# repository entirely: `build.md` says to keep real eval data out of git unless
+# the owner says otherwise, and section 7a is explicit about treating every
+# screenshot as sensitive. Label them in place with
+# `python -m evals.run --init-labels "sample ss"`.
+sample ss/
+sample_ss/
+
+# Generated eval sets and reports. Both are reproducible from a command and
+# either contain generated images or reference screenshots that are not ours.
+ml/evals/sets/
+ml/evals/reports/
 
 # Python environments and generated Graphify cache
 venv/

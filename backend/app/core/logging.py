@@ -1,13 +1,17 @@
 import json
 import logging
 import logging.config
+from contextvars import ContextVar
 from datetime import UTC, datetime
+
+
+request_id_context: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 
 class JsonFormatter(logging.Formatter):
     """Emit a small, allowlisted structured log record."""
 
-    _context_fields = ("request_id", "item_id", "stage", "duration_ms")
+    _context_fields = ("request_id", "item_id", "stage", "duration_ms", "item_count")
 
     def format(self, record: logging.LogRecord) -> str:
         payload: dict[str, object] = {
@@ -18,6 +22,8 @@ class JsonFormatter(logging.Formatter):
         }
         for field in self._context_fields:
             value = getattr(record, field, None)
+            if field == "request_id" and value is None:
+                value = request_id_context.get()
             if value is not None:
                 payload[field] = value
         if record.exc_info:

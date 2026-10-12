@@ -1,0 +1,30 @@
+{
+  "abstention_threshold": 0.5,
+  "build_text_version": "build-text-v1",
+  "created_at": "2026-10-11T13:47:00.938214+00:00",
+  "facet": "category",
+  "labels": [
+    "Design",
+    "Ideas",
+    "Inspiration",
+    "References",
+    "Research",
+    "Resources",
+    "Technology",
+    "Tutorials"
+  ],
+  "metrics": {
+    "macro_f1": 1.0,
+    "report": "              precision    recall  f1-score   support\n\n      Design       1.00      1.00      1.00        20\n       Ideas       1.00      1.00      1.00        20\n Inspiration       1.00      1.00      1.00        20\n  References       1.00      1.00      1.00        20\n    Research       1.00      1.00      1.00        20\n   Resources       1.00      1.00      1.00        20\n  Technology       1.00      1.00      1.00        20\n   Tutorials       1.00      1.00      1.00        20\n\n    accuracy                           1.00       160\n   macro avg       1.00      1.00      1.00       160\nweighted avg       1.00      1.00      1.00       160\n",
+    "split": "synthetic",
+    "warning": "not quality evidence"
+  },
+  "model_version": "legacy-8-tfidf-linear-svc",
+  "notes": "Trained on a synthetic, templated dataset. The card's macro_f1 exercises the code path and is NOT model-quality evidence. The abstention threshold is an unvalidated placeholder.",
+  "python_version": "3.13.7",
+  "sklearn_version": "0.0.1-not-a-version",
+  "taxonomy_version": "legacy-8",
+  "threshold_source": "default-unvalidated",
+  "training_data_sha256": "56cfeb0dd1bcb98077bec926a3d6f334f0d5598062db5149e4ec97dc9dbe34f3",
+  "training_row_count": 800
+}

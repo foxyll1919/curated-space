@@ -12,7 +12,8 @@ from PIL import Image
 
 from app.core.config import Settings
 from app.main import create_app
-from app.services.extraction.base import ExtractionResult, ModelInput
+from app.services.classification.base import Prediction
+from app.services.extraction.base import CacheIdentity, ExtractionResult, ModelInput
 from app.services.extraction.prompts import PROMPT_VERSION
 from app.services.extraction.schema import SCHEMA_VERSION, ExtractedMetadata
 
@@ -32,6 +33,7 @@ def make_settings(tmp_path: Path, **overrides: object) -> Settings:
         database_path=tmp_path / "db" / "test.db",
         storage_path=tmp_path / "uploads",
         gemini_api_key=None,
+        api_key="test-api-key",
     )
     return settings.model_copy(update=overrides)
 
@@ -48,6 +50,9 @@ class FakeExtractor:
         self.calls: list[ModelInput] = []
         self.error: Exception | None = None
         self.is_configured = True
+        self.cache_identity = CacheIdentity(
+            model="fake-model", prompt_version=PROMPT_VERSION, schema_version=SCHEMA_VERSION
+        )
 
     def extract(self, image: ModelInput) -> ExtractionResult:
         self.calls.append(image)
@@ -60,6 +65,51 @@ class FakeExtractor:
             schema_version=SCHEMA_VERSION,
             latency_ms=1,
         )
+
+
+class FakeClassifier:
+    """Stands in for the sklearn adapter. Records calls for assertions."""
+
+    is_ready = True
+
+    def __init__(
+        self,
+        prediction: Prediction | None = None,
+        *,
+        ready: bool = True,
+        error: Exception | None = None,
+    ) -> None:
+        self.prediction = prediction or Prediction(
+            labels={"category": "Tutorials"},
+            score=1.25,
+            abstained=False,
+            model_version="fake-model",
+            taxonomy_version="legacy-8",
+        )
+        self.calls: list[str] = []
+        self.error = error
+        if not ready:
+            self.is_ready = False
+
+    @property
+    def status(self):
+        from app.services.classification.sklearn_svc import ClassifierStatus
+
+        return ClassifierStatus("ok" if self.is_ready else "unavailable")
+
+    @property
+    def taxonomy_version(self):
+        return self.prediction.taxonomy_version if self.is_ready else None
+
+    @property
+    def model_version(self):
+        return self.prediction.model_version if self.is_ready else None
+
+    def predict(self, text: str) -> Prediction:
+        self.calls.append(text)
+        if self.error is not None:
+            raise self.error
+        return self.prediction
 
 
 @pytest.fixture
@@ -77,11 +127,16 @@ def extractor() -> FakeExtractor:
 
 
 @pytest.fixture
-def client(migrated_settings: Settings, extractor: FakeExtractor):
+def classifier() -> FakeClassifier:
+    return FakeClassifier()
+
+
+@pytest.fixture
+def client(migrated_settings: Settings, extractor: FakeExtractor, classifier: FakeClassifier):
     from fastapi.testclient import TestClient
 
-    app = create_app(migrated_settings, extractor=extractor)
-    with TestClient(app) as test_client:
+    app = create_app(migrated_settings, extractor=extractor, classifier=classifier)
+    with TestClient(app, headers={"X-API-Key": "test-api-key"}) as test_client:
         yield test_client
 
 

@@ -1,0 +1,15 @@
+{
+  "version": "legacy-8",
+  "facet": "category",
+  "description": "Placeholder taxonomy from the 800-row synthetic dataset. Not the v1 Intent x Domain guide. Its accuracy says nothing about real screenshots: the training rows are templated, and a cue phrase such as 'cheat sheet' largely decides the label.",
+  "labels": [
+    "Design",
+    "Ideas",
+    "Inspiration",
+    "References",
+    "Research",
+    "Resources",
+    "Technology",
+    "Tutorials"
+  ]
+}

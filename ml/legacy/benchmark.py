@@ -8,16 +8,9 @@ import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    precision_recall_fscore_support
-)
+from sklearn.metrics import accuracy_score, classification_report, precision_recall_fscore_support
 
-from transformers import (
-    AutoTokenizer,
-    AutoModelForSequenceClassification
-)
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 # ==========================================
@@ -37,20 +30,11 @@ TFIDF_OUT = "ml/model/curated_space_classifier.pkl"
 # LOAD LABELS + SPLITS
 # ==========================================
 
-with open(
-    f"{DATA_DIR}/labels.json",
-    "r",
-    encoding="utf-8"
-) as f:
-
+with open(f"{DATA_DIR}/labels.json", "r", encoding="utf-8") as f:
     label_data = json.load(f)
 
 
-id2label = {
-    int(index): label
-    for index, label
-    in label_data["id2label"].items()
-}
+id2label = {int(index): label for index, label in label_data["id2label"].items()}
 
 
 import pandas as pd
@@ -86,13 +70,9 @@ print("=" * 60)
 print("MODEL A: TF-IDF + LinearSVC  (ml/train.py approach)")
 print("=" * 60)
 
-tfidf_model = Pipeline([
-    ("tfidf", TfidfVectorizer(
-        lowercase=True,
-        ngram_range=(1, 2)
-    )),
-    ("svm", LinearSVC())
-])
+tfidf_model = Pipeline(
+    [("tfidf", TfidfVectorizer(lowercase=True, ngram_range=(1, 2))), ("svm", LinearSVC())]
+)
 
 tfidf_start = time.perf_counter()
 
@@ -107,10 +87,7 @@ tfidf_pred_names = [id2label[int(i)] for i in tfidf_pred_ids]
 tfidf_acc = accuracy_score(y_test_names, tfidf_pred_names)
 
 tfidf_p, tfidf_r, tfidf_f1, _ = precision_recall_fscore_support(
-    y_test_names,
-    tfidf_pred_names,
-    average="macro",
-    zero_division=0
+    y_test_names, tfidf_pred_names, average="macro", zero_division=0
 )
 
 # inference latency
@@ -149,9 +126,7 @@ print("=" * 60)
 
 tokenizer = AutoTokenizer.from_pretrained(DISTILBERT_PATH)
 
-distilbert = AutoModelForSequenceClassification.from_pretrained(
-    DISTILBERT_PATH
-)
+distilbert = AutoModelForSequenceClassification.from_pretrained(DISTILBERT_PATH)
 
 distilbert.eval()
 
@@ -161,13 +136,7 @@ distilbert_latency_total = 0.0
 
 with torch.no_grad():
     for text in X_test:
-
-        inputs = tokenizer(
-            text,
-            return_tensors="pt",
-            truncation=True,
-            max_length=256
-        )
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
 
         t0 = time.perf_counter()
 
@@ -175,21 +144,14 @@ with torch.no_grad():
 
         distilbert_latency_total += time.perf_counter() - t0
 
-        distilbert_pred_ids.append(
-            int(torch.argmax(outputs.logits, dim=-1).item())
-        )
+        distilbert_pred_ids.append(int(torch.argmax(outputs.logits, dim=-1).item()))
 
 distilbert_pred_names = [id2label[i] for i in distilbert_pred_ids]
 
 distilbert_acc = accuracy_score(y_test_names, distilbert_pred_names)
 
-distilbert_p, distilbert_r, distilbert_f1, _ = (
-    precision_recall_fscore_support(
-        y_test_names,
-        distilbert_pred_names,
-        average="macro",
-        zero_division=0
-    )
+distilbert_p, distilbert_r, distilbert_f1, _ = precision_recall_fscore_support(
+    y_test_names, distilbert_pred_names, average="macro", zero_division=0
 )
 
 distilbert_latency = distilbert_latency_total / len(X_test)
@@ -218,7 +180,9 @@ print("-" * 50)
 print(f"{'Accuracy':<18}{tfidf_acc * 100:>15.2f}%{distilbert_acc * 100:>15.2f}%")
 print(f"{'Macro F1':<18}{tfidf_f1:>16.4f}{distilbert_f1:>16.4f}")
 print(f"{'Latency (ms)':<18}{tfidf_latency * 1000:>16.3f}{distilbert_latency * 1000:>16.3f}")
-print(f"{'Size (bytes)':<18}{os.path.getsize(TFIDF_OUT):>16}{os.path.getsize(DISTILBERT_PATH + '/model.safetensors'):>16}")
+print(
+    f"{'Size (bytes)':<18}{os.path.getsize(TFIDF_OUT):>16}{os.path.getsize(DISTILBERT_PATH + '/model.safetensors'):>16}"
+)
 
 
 # ==========================================
@@ -233,9 +197,7 @@ print("=" * 60)
 disagreements = 0
 
 for i, text in enumerate(X_test):
-
     if tfidf_pred_names[i] != distilbert_pred_names[i]:
-
         disagreements += 1
 
         correct_a = tfidf_pred_names[i] == y_test_names[i]

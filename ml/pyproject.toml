@@ -1,0 +1,22 @@
+[project]
+name = "curated-ml"
+version = "0.1.0"
+description = "Shared text building, taxonomy, model-card and evaluation logic for Curated Space"
+requires-python = ">=3.12"
+dependencies = [
+    "joblib>=1.4,<2",
+    "pandas>=2.2,<4",
+    "scikit-learn>=1.5,<2",
+]
+
+# Pillow and google-genai are deliberately NOT declared here. They are already
+# backend dependencies, and the eval harness runs in the backend environment.
+# Re-declaring them would let this package drag the backend's pinned Pillow
+# backwards, which is not this package's decision to make.
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/curated_ml", "src/curated_evals"]

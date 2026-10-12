@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import warnings
 from dataclasses import dataclass
 from typing import Final
 
@@ -11,6 +12,7 @@ from app.core.config import Settings
 from app.core.errors import (
     AnimatedImageError,
     PayloadTooLargeError,
+    TooManyPixelsError,
     UnprocessableImageError,
     UnsupportedMediaTypeError,
 )
@@ -60,20 +62,26 @@ def read_bounded(file, max_bytes: int) -> bytes:
 
 def _open_image(data: bytes) -> Image.Image:
     try:
-        probe = Image.open(io.BytesIO(data))
-        decoded_format = probe.format
-        if decoded_format not in ALLOWED_FORMATS:
-            raise UnsupportedMediaTypeError()
-        if getattr(probe, "is_animated", False) or getattr(probe, "n_frames", 1) > 1:
-            raise AnimatedImageError()
-        probe.verify()
+        with warnings.catch_warnings():
+            # Pillow warns between MAX_IMAGE_PIXELS and twice that limit, then
+            # raises beyond twice the limit. Treat both cases as a stable
+            # firewall rejection before a full decode can allocate the raster.
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            probe = Image.open(io.BytesIO(data))
+            decoded_format = probe.format
+            if decoded_format not in ALLOWED_FORMATS:
+                raise UnsupportedMediaTypeError()
+            if getattr(probe, "is_animated", False) or getattr(probe, "n_frames", 1) > 1:
+                raise AnimatedImageError()
+            probe.verify()
     except UnsupportedMediaTypeError:
         raise
     except UnprocessableImageError:
         raise
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
+        raise TooManyPixelsError() from exc
     except (
         UnidentifiedImageError,
-        Image.DecompressionBombError,
         SyntaxError,
         ValueError,
         OSError,
@@ -83,10 +91,13 @@ def _open_image(data: bytes) -> Image.Image:
 
     try:
         # verify() leaves the image unusable, so reopen to decode the pixels.
-        return Image.open(io.BytesIO(data))
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            return Image.open(io.BytesIO(data))
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
+        raise TooManyPixelsError() from exc
     except (
         UnidentifiedImageError,
-        Image.DecompressionBombError,
         SyntaxError,
         ValueError,
         OSError,
@@ -152,11 +163,9 @@ def sanitize_image(data: bytes, settings: Settings) -> SanitizedImage:
         if width == 0 or height == 0:
             raise UnprocessableImageError()
         if width > settings.max_image_edge or height > settings.max_image_edge:
-            raise UnprocessableImageError(
-                f"Image edges exceed the {settings.max_image_edge}px limit."
-            )
+            raise TooManyPixelsError()
         if width * height > settings.max_image_pixels:
-            raise UnprocessableImageError("The image has too many pixels.")
+            raise TooManyPixelsError()
 
         normalized = _normalized(image)
     finally:

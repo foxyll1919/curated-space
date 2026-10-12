@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "backend/**"
+      - "ml/**"
       - ".github/workflows/backend-ci.yml"
   pull_request:
     paths:
       - "backend/**"
+      - "ml/**"
       - ".github/workflows/backend-ci.yml"
 
 jobs:
@@ -31,6 +33,72 @@ jobs:
           # Live Gemini tests are excluded: CI must never spend tokens or
           # send an image to the provider. Run them locally with -m live.
           uv run pytest -m "not live"
-          uv run ruff check .
-          uv run ruff format --check app main.py migrations tests
+          uv run ruff check . ../ml
+          uv run ruff format --check app main.py migrations tests ../ml/src ../ml/evals ../ml/train.py ../ml/predict.py
           uv run mypy app main.py
+
+  eval-harness:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install locked dependencies
+        run: uv sync --locked
+      - name: Build the generated set and run the harness with the fake provider
+        # This is the harness's own smoke test: it must produce a report with no
+        # key, no network and no screenshots from the owner. It measures the
+        # code, not the model, which is why the set is generated.
+        run: |
+          uv run python -c "
+          from curated_evals.synthetic import build_synthetic_set
+          build_synthetic_set('../ml/evals/sets/synthetic', '../ml/taxonomy/legacy-8.json')
+          "
+          uv run python ../ml/evals/run.py \
+            --set ../ml/evals/sets/synthetic \
+            --taxonomy ../ml/taxonomy/legacy-8.json \
+            --all --models gemini-3.5-flash-lite gemini-3.1-flash-lite \
+            --resolutions MEDIUM \
+            --provider-labels --fake \
+            --out-dir $RUNNER_TEMP/reports \
+            --repeats 2
+      - name: The report must be marked synthetic and must show a working cache
+        run: |
+          uv run python -c "
+          import glob, json, sys
+          path = glob.glob('$RUNNER_TEMP/reports/*.json')
+          assert len(path) == 1, path
+          report = json.load(open(path[0], encoding='utf-8'))
+          assert report['set']['split'] == 'synthetic', report['set']
+          assert report['pricing']['provider'] == 'fake'
+          for run in report['runs']:
+              assert run['cache_hits'] > 0, 'cache never hit'
+              assert run['cost']['usd_per_item'] is not None
+              assert run['failures'] == [], run['failures']
+          print('eval report OK:', len(report['runs']), 'configs')
+          "
+
+  train-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install locked dependencies
+        run: uv sync --locked
+      - name: Assert the committed artifact and card agree with the taxonomy
+        run: uv run python -m pytest tests/test_classification.py -q

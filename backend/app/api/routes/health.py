@@ -45,15 +45,30 @@ def _storage_status(storage_path: Path) -> str:
         return "unavailable"
 
 
+def _classifier_status(request: Request) -> str:
+    classifier = request.app.state.classifier
+    if classifier.is_ready:
+        return "ok"
+    status = getattr(classifier, "status", None)
+    return getattr(status, "name", "unavailable")
+
+
 @router.get("/ready", response_model=ReadyResponse)
 def ready(request: Request, response: Response) -> ReadyResponse:
     components = {
         "database": _database_status(request),
         "storage": _storage_status(request.app.state.settings.storage_path),
-        "classifier": "deferred_until_milestone_4",
+        "classifier": _classifier_status(request),
+        "api_auth": "ok" if request.app.state.settings.api_key is not None else "unconfigured",
     }
     extractor = request.app.state.extractor
     components["extractor"] = "ok" if getattr(extractor, "is_configured", True) else "no_api_key"
-    is_ready = components["database"] == "ok" and components["storage"] == "ok"
+    # The classifier is a challenger, not a dependency: a missing artifact is
+    # reported but does not make the service unready.
+    is_ready = (
+        components["database"] == "ok"
+        and components["storage"] == "ok"
+        and components["api_auth"] == "ok"
+    )
     response.status_code = 200 if is_ready else 503
     return ReadyResponse(status="ready" if is_ready else "not_ready", components=components)

@@ -5,6 +5,7 @@ description = "Backend API for the Curated Space screenshot library"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.13,<2",
+    "curated-ml",
     "fastapi>=0.115,<1",
     "google-genai>=1.0,<3",
     "joblib>=1.4,<2",
@@ -16,6 +17,11 @@ dependencies = [
     "sqlalchemy>=2,<3",
     "uvicorn[standard]>=0.32,<1",
 ]
+
+# One editable copy of curated_ml, imported by both ml/train.py and the backend,
+# so build_text() has exactly one implementation.
+[tool.uv.sources]
+curated-ml = { path = "../ml", editable = true }
 
 [dependency-groups]
 dev = [
@@ -36,6 +42,8 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# Archived DistilBERT-era experiments, kept for reference only.
+extend-exclude = ["../ml/legacy"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
@@ -44,3 +52,7 @@ select = ["E4", "E7", "E9", "F"]
 python_version = "3.12"
 warn_unused_configs = true
 check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "joblib.*"]
+ignore_missing_imports = true
