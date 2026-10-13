@@ -34,6 +34,9 @@ def make_settings(tmp_path: Path, **overrides: object) -> Settings:
         storage_path=tmp_path / "uploads",
         gemini_api_key=None,
         api_key="test-api-key",
+        # PBKDF2 at 600k iterations would dominate the suite's runtime; the
+        # cost of a slow hash is a security property these tests do not check.
+        password_hash_iterations=1_000,
     )
     return settings.model_copy(update=overrides)
 
@@ -138,6 +141,30 @@ def client(migrated_settings: Settings, extractor: FakeExtractor, classifier: Fa
     app = create_app(migrated_settings, extractor=extractor, classifier=classifier)
     with TestClient(app, headers={"X-API-Key": "test-api-key"}) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def make_client(extractor: FakeExtractor, classifier: FakeClassifier):
+    """Build a client with custom settings. No API key header is attached."""
+    from fastapi.testclient import TestClient
+
+    created: list[TestClient] = []
+
+    def factory(settings: Settings) -> TestClient:
+        app = create_app(settings, extractor=extractor, classifier=classifier)
+        test_client = TestClient(app)
+        created.append(test_client)
+        return test_client
+
+    yield factory
+    for test_client in created:
+        test_client.close()
+
+
+@pytest.fixture
+def auth_settings(migrated_settings: Settings) -> Settings:
+    """Settings with no API key, so only a session cookie can authenticate."""
+    return migrated_settings.model_copy(update={"api_key": None})
 
 
 def make_image(

@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local env, holds the API key
+# Local env. Holds no credentials since sign-in moved to a session cookie.
 .env

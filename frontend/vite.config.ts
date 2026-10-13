@@ -1,35 +1,26 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // The API key is read from an unprefixed variable. Vite only exposes
-  // `VITE_*` keys to client code, so anything read here stays server-side and
-  // never reaches the bundle.
+  // The backend URL is read from an unprefixed variable. Vite only exposes
+  // `VITE_*` keys to client code, so anything read here stays server-side.
+  //
+  // There is deliberately no API key here any more: sign-in happens in the app
+  // and the session lives in an httpOnly cookie the backend sets. A key injected
+  // by the proxy would answer every request as the same owner and quietly
+  // bypass per-account isolation.
   const env = loadEnv(mode, process.cwd(), '')
-  const apiKey = env.API_KEY ?? ''
   const target = env.BACKEND_URL ?? 'http://localhost:8000'
 
-  if (!apiKey) {
-    console.warn(
-      '[curated-space] API_KEY is not set. Copy .env.example to .env and set API_KEY, ' +
-        'or item and usage requests will return 401.',
-    )
-  }
-
-  // Every /api request is same-origin from the browser. The proxy attaches the
-  // key so no key ever lives in client code.
-  const proxy: Record<string, ProxyOptions> = {
+  // Every /api request is same-origin from the browser, so the session cookie
+  // rides along and nothing about the credential is visible to page scripts.
+  const proxy = {
     '/api': {
       target,
       changeOrigin: true,
-      configure(proxyServer) {
-        proxyServer.on('proxyReq', (proxyReq) => {
-          if (apiKey) proxyReq.setHeader('X-API-Key', apiKey)
-        })
-      },
     },
   }
 

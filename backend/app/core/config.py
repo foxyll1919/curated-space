@@ -29,6 +29,20 @@ class Settings(BaseSettings):
     # Milestone 9: one configured key maps to one stable owner identity.
     api_key: SecretStr | None = None
     api_key_owner_id: str = "legacy-owner"
+
+    # User accounts. Registration is always allowed for the very first account
+    # so a fresh install is usable; afterwards it needs `auth_allow_registration`
+    # or the `bootstrap-user` CLI. Password hashing uses the standard library,
+    # so the only tunable is the PBKDF2 iteration count.
+    auth_allow_registration: bool = False
+    auth_session_ttl_days: int = Field(default=30, ge=1)
+    auth_cookie_name: str = "cs_session"
+    # Set true once the app is served over HTTPS; a session cookie must never
+    # travel in plaintext on a public deployment.
+    auth_cookie_secure: bool = False
+    auth_password_min_length: int = Field(default=10, ge=8)
+    password_hash_iterations: int = Field(default=600_000, ge=1)
+    login_rate_limit: int = Field(default=10, ge=1)
     allowed_origins: list[str] = Field(default_factory=list)
     upload_rate_limit: int = Field(default=10, ge=1)
     reanalyze_rate_limit: int = Field(default=5, ge=1)

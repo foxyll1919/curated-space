@@ -9,6 +9,9 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 
+from sqlalchemy import inspect
+
+from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
 from app.api.routes.items import router as items_router
 from app.api.routes.usage import router as usage_router
@@ -17,6 +20,7 @@ from app.core.errors import AppError
 from app.core.logging import configure_logging
 from app.core.middleware import RequestSecurityMiddleware
 from app.db.session import create_database_engine, create_session_factory
+from app.services.auth import purge_expired_sessions
 from app.services.classification.base import Classifier
 from app.services.classification.sklearn_svc import (
     ClassifierLoadError,
@@ -82,6 +86,14 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        with pipeline_context.session_factory() as startup_session:
+            if inspect(startup_session.get_bind()).has_table("sessions"):
+                expired_sessions = purge_expired_sessions(startup_session)
+                if expired_sessions:
+                    logging.getLogger(__name__).info(
+                        "expired_sessions_purged",
+                        extra={"stage": "auth", "session_count": expired_sessions},
+                    )
         expired = purge_expired_items(
             pipeline_context.session_factory,
             app_storage,
@@ -126,7 +138,9 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=app_settings.allowed_origins,
-        allow_credentials=False,
+        # The session cookie is the app's credential, so a configured origin
+        # list must be allowed to send it. Wildcards are rejected by settings.
+        allow_credentials=bool(app_settings.allowed_origins),
         allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "X-API-Key", "X-Request-ID"],
     )
@@ -134,6 +148,7 @@ def create_app(
         RequestSecurityMiddleware, max_body_bytes=app_settings.max_request_body_bytes
     )
     app.include_router(health_router, prefix="/api/v1")
+    app.include_router(auth_router, prefix="/api/v1")
     app.include_router(items_router, prefix="/api/v1")
     app.include_router(usage_router, prefix="/api/v1")
 

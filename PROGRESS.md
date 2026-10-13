@@ -1,7 +1,8 @@
 # Backend + ML build progress
 
 Last updated: 2026-10-13
-Scope: backend and ML only; frontend is out of scope.
+Scope: backend and ML by default. The sign-in work below is the one documented
+exception: it was requested explicitly and also touches `frontend/`.
 
 ## Milestone status
 
@@ -17,6 +18,7 @@ Scope: backend and ML only; frontend is out of scope.
 | 8 | Jobs + API features | Done | Added bounded in-process background jobs, startup recovery, the 202 upload/reanalyze flow, correction and delete APIs, FTS5 search/filtering, and idempotent processing claims. See "Milestone 8 verification" below. |
 | 9 | API firewall + privacy | Done | Static-key auth and owner scoping, rate limits, CORS/security headers, `skip_analysis`, and configurable retention. See Milestone 9 implementation below. |
 | 10 | Docs | Done | Rewrote README around the implemented screenshot pipeline, PowerShell operations, configuration, privacy, costs and limitations. See Milestone 10 documentation below. |
+| 11 | Accounts, sessions and sign-in (owner request, outside `build.md`) | Done | Added `users`/`sessions`, PBKDF2 password hashing, session-cookie auth, the `/auth` routes, per-account ownership, a login rate limit, and a guarded sign-in page in the frontend. See Milestone 11 below. |
 
 ## Decisions and constraints
 
@@ -382,3 +384,43 @@ Consequences, stated plainly:
   still recorded as Free based on its last owner confirmation on 2026-10-11;
   the README calls out that date rather than presenting it as a live account
   check.
+
+## Milestone 11 implementation (2026-10-13)
+
+Requested directly by the owner as frontend work, which uild.md section 14
+excludes; the brief is otherwise unchanged. Static-key auth stays as an
+alternative credential, so no documented curl flow breaks.
+
+- Added Alembic revision  004_user_sessions: a users table with a unique
+  lowercase email and a sessions table holding only the SHA-256 digest of a
+  token, its owner and its expiry. items.owner_id needed no change; a user
+  hands out its uuid as the owner id.
+- Passwords use PBKDF2-HMAC-SHA256 from the standard library in
+  pp/core/security.py with a per-account salt and the iteration count encoded
+  in the hash. No new dependency was added.
+- pp/services/auth.py and pp/api/routes/auth.py add /auth/status,
+  /auth/register, /auth/login, /auth/me, /auth/logout and
+  /auth/logout-all. The token is delivered only as an httpOnly, SameSite=Lax
+  cookie; registration is open for the first account and afterwards needs
+  AUTH_ALLOW_REGISTRATION or python -m app.cli.bootstrap_user.
+- get_current_owner accepts the session cookie or the static key, preferring the
+  cookie, so every existing owner-scoped query and test keeps working.
+  get_current_user has no key fallback, which is why /auth/me refuses a key
+  caller. Readiness now reports pi_auth and session_auth separately and is
+  ready when either path is configured.
+- The first account adopts rows still owned by API_KEY_OWNER_ID, so a library
+  saved through the key before accounts existed is not orphaned. Login and
+  register pass through the fixed-window limiter keyed on credential or IP.
+  Expired sessions are purged at startup, and startup skips that when the schema
+  has not been migrated yet.
+- Frontend: lib/auth.ts calls the account routes, hooks/useAuth.tsx holds the
+  session, RequireAccount in App.tsx gates the shell, LoginPage.tsx signs in
+  or creates the first account, and AccountMenu.tsx signs out or signs out
+  everywhere. A 401 anywhere in lib/api.ts fires a window event that returns
+  the reader to the sign-in page. The Vite proxy no longer injects
+  X-API-Key: it would answer as one owner and skip per-account ownership.
+- uv run pytest -m "not live": **182 passed, 2 live tests deselected**. Ruff
+  lint, Ruff format check and mypy app main.py passed. Frontend
+  
+pm run check passed. One existing Starlette TestClient deprecation warning
+  remains.

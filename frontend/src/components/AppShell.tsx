@@ -2,6 +2,7 @@
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ServerStrip } from '@/components/ServerStrip'
+import { AccountMenu } from '@/components/AccountMenu'
 import { cn } from 'cn'
 
 const NAV = [
@@ -53,6 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-1">
             <ServerStrip />
             <ThemeToggle />
+            <AccountMenu />
           </div>
         </div>
       </header>

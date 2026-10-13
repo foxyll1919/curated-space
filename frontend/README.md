@@ -20,95 +20,101 @@ uv run alembic upgrade head
 uv run uvicorn app.main:app --port 8000
 ```
 
-`backend/.env` needs a `GEMINI_API_KEY` to analyze screenshots and an `API_KEY`
-to serve them. See the repository `readme.md`.
+`backend/.env` needs a `GEMINI_API_KEY` to analyze screenshots. See the
+repository `readme.md`.
 
 **2. Frontend**:
 
 ```powershell
 cd frontend
 npm install
-Copy-Item .env.example .env   # then paste your API_KEY in
+Copy-Item .env.example .env
 npm run dev
 ```
 
 The app is at http://localhost:5173 and proxies `/api` to
-http://localhost:8000.
+http://localhost:8000. Open it and create your account on the sign-in page; the
+first account registers the library's owner and adopts any screenshots that were
+saved before accounts existed.
 
 ## Environment variables
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `API_KEY` | yes | Shared key sent as `X-API-Key`. Must match `API_KEY` in `backend/.env`. |
 | `BACKEND_URL` | no | Where the backend listens. Defaults to `http://localhost:8000`. |
 
-Both live in `frontend/.env`, which is git-ignored. Copy `.env.example` to get
-started.
+There is no credential in `frontend/.env` any more. Authentication is a session
+cookie the backend sets, and the browser sends it by itself.
 
-**`API_KEY` must not be named `VITE_*`.** Vite exposes `VITE_`-prefixed
-variables to client code through `import.meta.env`, which would put the key in
-the JavaScript bundle. The proxy reads it with `loadEnv` instead, on the Node
-side only, so it never reaches the browser.
+## How sign-in works
 
-## How the key proxy works
+The sign-in page posts an email and password to `/api/v1/auth/login`. The backend
+answers with an `httpOnly`, `SameSite=Lax` cookie and nothing else; the token is
+never in a response body, so no script in this bundle can read it.
 
-`vite.config.ts` registers a dev-server proxy for `/api`:
+From then on the app asks `GET /api/v1/auth/me` once and keeps the answer in
+TanStack Query. `RequireAccount` in `src/App.tsx` renders nothing while that
+request is in flight, redirects to `/login` when it comes back 401, and returns
+the reader to the page they wanted afterwards.
+
+When any request anywhere in the app comes back 401, `src/lib/api.ts` fires a
+window event that the auth provider listens for. That is how an expired or
+revoked session lands back on the sign-in page instead of an empty grid.
+
+Accounts:
+
+- The **first** account may always be created, so a fresh install is usable.
+- Later accounts need `AUTH_ALLOW_REGISTRATION=true` in `backend/.env`, or the
+  `bootstrap-user` CLI. The sign-in page hides the switch when it is closed.
+- Passwords are PBKDF2-HMAC-SHA256 hashed in the backend with a per-account
+  salt. Nothing hashes on this side.
+- `Sign out everywhere` in the account menu revokes every session, which is the
+  one you want on a shared machine.
+
+`vite.config.ts` still proxies `/api`, but it adds no headers:
 
 ```ts
-const env = loadEnv(mode, process.cwd(), '')
-const apiKey = env.API_KEY ?? ''
-
 const proxy = {
-  '/api': {
-    target: env.BACKEND_URL ?? 'http://localhost:8000',
-    changeOrigin: true,
-    configure(proxyServer) {
-      proxyServer.on('proxyReq', (proxyReq) => {
-        if (apiKey) proxyReq.setHeader('X-API-Key', apiKey)
-      })
-    },
-  },
+  '/api': { target, changeOrigin: true },
 }
 ```
 
-The browser only ever makes same-origin requests to `/api/v1/...`. The dev
-server adds the header on the way out. Two consequences worth knowing:
-
-- The key is not in the bundle, the browser network tab, or local storage.
-- `<img src="/api/v1/items/{id}/image">` works with no extra work, because the
-  image request goes through the same proxy and picks up the same header.
-
-`npm run preview` uses the same proxy, so a production build can be checked
-locally with the key in place.
+That is deliberate. When the proxy injected an `X-API-Key`, every request would
+answer as the same configured owner and per-account ownership checks would never
+be exercised. `npm run preview` uses the same proxy.
 
 ### The production equivalent
 
-A production deployment needs the same guarantee from a real reverse proxy
-rather than from Vite. Anything that can add a request header on the way to the
-backend works; nginx, for example:
+A production deployment needs the same same-origin guarantee from a real reverse
+proxy rather than from Vite:
 
 ```nginx
 location /api/ {
     proxy_pass http://127.0.0.1:8000;
-    proxy_set_header X-API-Key "<the same API_KEY>";
     proxy_set_header Host $host;
     client_max_body_size 8m;
 }
 ```
 
 Serve `dist/` as static files and route unknown paths to `index.html`, because
-the router uses real paths (`/usage`, `/item/{id}`).
+the router uses real paths (`/login`, `/usage`, `/item/{id}`). Serve the app over
+HTTPS and set `AUTH_COOKIE_SECURE=true` in `backend/.env`, or the session cookie
+will travel in plaintext.
 
-Note that the header has to be set by the proxy rather than forwarded from the
-browser, and the key must not be readable by anyone who can load the app. This
-is a single-user personal library behind one shared key, which is what the
-backend's `X-API-Key` model assumes.
+`backend/.env`'s `API_KEY` still works for scripts and `curl`:
+
+```powershell
+curl.exe -H "X-API-Key: $env:API_KEY" http://localhost:8000/api/v1/items
+```
+
+That key maps to one owner id, which is not an account: `/api/v1/auth/me` has no
+answer for it. Use the sign-in page for the UI.
 
 ## Scripts
 
 | Script | What it does |
 |---|---|
-| `npm run dev` | Dev server with the key-injecting proxy. |
+| `npm run dev` | Dev server with the same-origin `/api` proxy. |
 | `npm run build` | Type-check and build to `dist/`. |
 | `npm run typecheck` | `tsc --noEmit`. |
 | `npm run lint` | oxlint. |
@@ -140,23 +146,34 @@ does not cover, both handled in `src/lib/api.ts`:
 ```
 src/
   lib/
-    api.ts          typed client; the only module that calls fetch
+    api.ts          typed client; the only module that calls fetch for items
     api-types.ts    generated from openapi.json, do not edit
+    auth.ts         account calls; the session cookie is the credential
+    auth-context.ts the auth context object and useAuth, no components
     errors.ts       ApiError and the error-envelope parser
     failures.ts     error_code to human copy
     ratio.ts        screenshot aspect ratio for the masonry
   hooks/
+    useAuth.tsx     the AuthProvider: session state and sign-in mutations
     useItems.ts     list, detail, polling, patch, delete
     useUpload.ts    validation and the client-side upload queue
     useDebounce.ts
   components/
     ui/             shadcn/ui, copied in by the CLI
+    AccountMenu.tsx the signed-in account, sign out, sign out everywhere
     *               feature components
   pages/
-    LibraryPage.tsx ItemPage.tsx UsagePage.tsx NotFoundPage.tsx
+    LibraryPage.tsx ItemPage.tsx UsagePage.tsx LoginPage.tsx NotFoundPage.tsx
 ```
 
 ## Notes on behaviour
+
+**Sign in.** One page for both signing in and creating the first account. It
+shows "create account" until `GET /auth/status` reports that an account exists,
+and hides the switch when registration is closed. Passwords are never stored,
+compared or confirmed on this side: the confirmation field only catches a typo
+before a request is made. Failed attempts get one message, because the backend
+does not reveal whether an address exists.
 
 **Upload.** Images only, 8 MB max, checked in the browser before anything is
 sent. Files upload two at a time; the backend allows 10 per minute, so a burst

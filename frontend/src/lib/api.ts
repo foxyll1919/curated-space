@@ -65,6 +65,14 @@ export const FILTERABLE_STATUSES: readonly { value: ItemStatus; label: string }[
 
 const BASE = '/api/v1'
 
+/**
+ * Fired on the window when any request comes back 401. The session lives in a
+ * cookie the app cannot read, so an expired or revoked session is only visible
+ * as a refused request; `AuthProvider` listens for this and returns the reader
+ * to the sign-in page.
+ */
+export const UNAUTHORIZED_EVENT = 'curated-space:unauthorized'
+
 export type ItemQuery = {
   q?: string
   status?: ItemStatus
@@ -76,9 +84,13 @@ export type ItemQuery = {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`${BASE}${path}`, init)
+    // Same-origin by default, so the session cookie rides along on its own.
+    response = await fetch(`${BASE}${path}`, { credentials: 'same-origin', ...init })
   } catch (cause) {
     throw toTransportError(cause)
+  }
+  if (response.status === 401) {
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
   }
   if (!response.ok) throw await toApiError(response)
   if (response.status === 204) return undefined as T

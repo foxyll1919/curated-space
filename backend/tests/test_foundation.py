@@ -54,6 +54,7 @@ def test_readiness_checks_schema_and_storage(tmp_path):
             "classifier": "ok",
             "extractor": "ok",
             "api_auth": "ok",
+            "session_auth": "no_users_yet",
         },
     }
     assert storage_path.is_dir()

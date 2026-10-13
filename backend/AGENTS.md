@@ -94,16 +94,38 @@ python ml/predict.py
 
 ## Milestone 9 API security and retention
 
-`API_KEY` is required by every item and usage endpoint; it maps to
-`API_KEY_OWNER_ID` (keep the default `legacy-owner` stable after migration).
-Health and readiness remain public for probes. Set `ALLOWED_ORIGINS` to an
-explicit JSON array of origins, never `*`. Upload and reanalyze limits are
-process-local, so move the limiter behind shared storage before scaling to
-multiple API workers. `ANALYSIS_ENABLED=false` or upload field
+`API_KEY` is optional once accounts exist: item and usage routes accept either a
+session cookie or the key, and `get_current_owner` prefers the cookie. The key
+maps to `API_KEY_OWNER_ID` (keep the default `legacy-owner` stable after
+migration) and has no account behind it, so `/auth/me` refuses a key caller
+rather than inventing one. Health and readiness remain public for probes.
+Set `ALLOWED_ORIGINS` to an explicit JSON array of origins, never `*`. Upload and
+reanalyze limits are process-local, so move the limiter behind shared storage
+before scaling to multiple API workers. `ANALYSIS_ENABLED=false` or upload field
 `skip_analysis=true` stores the item as deferred and never queues a model call.
 `ITEM_RETENTION_DAYS=0` keeps items until explicitly deleted; positive values
 purge old item rows and blobs at startup. The delete route also removes an
 item's unshared analysis cache entry.
+
+## Accounts and sessions
+
+`users` and `sessions` arrive in Alembic revision `0004_user_sessions`. Passwords
+are PBKDF2-HMAC-SHA256 from the standard library in `core/security.py`, with the
+parameters encoded in the hash; **do not add a hashing dependency** without a
+reason in the PR description. A session stores only the SHA-256 digest of a
+random token, which reaches the browser as an httpOnly `SameSite=Lax` cookie and
+never in a response body.
+
+Registration is open for the first account only, so a fresh install has a way in;
+`AUTH_ALLOW_REGISTRATION` or `app/cli/bootstrap_user.py` opens it further. The
+first account adopts rows still owned by `API_KEY_OWNER_ID`, which is what keeps
+a pre-account library visible. Every login and register call passes through
+`enforce_rate_limit`, and `authenticate` answers identically for an unknown
+address and a wrong password. Keep both properties if you touch that code.
+
+Do not log passwords, session tokens, token digests or emails at INFO. A
+`401` from any route means the session died, and the frontend relies on that to
+return the reader to the sign-in page.
 
 Settings resolve SQLite and storage paths from the backend configuration. Run
 Alembic before starting the app; production startup never creates tables. Tests

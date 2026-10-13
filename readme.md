@@ -9,17 +9,48 @@ The frontend is a Vite app in `frontend/`. Start the backend on port 8000, then:
 ```powershell
 cd frontend
 npm install
-Copy-Item .env.example .env   # then set API_KEY to the same value as backend/.env
+Copy-Item .env.example .env
 npm run dev
 ```
 
-It serves http://localhost:5173 and proxies `/api` to the backend, injecting the `X-API-Key` header on the way out so the key never reaches the browser. See [`frontend/README.md`](frontend/README.md) for the environment variables, the production reverse-proxy equivalent, and the rest.
+It serves http://localhost:5173 and proxies `/api` to the backend. Open it and
+create your account on the sign-in page: the backend sets an `httpOnly` session
+cookie, so there is no key in the frontend environment and nothing for a browser
+extension to read. See [`frontend/README.md`](frontend/README.md) for the sign-in
+flow, the environment variables, the production reverse-proxy equivalent, and
+the rest.
+
+## Accounts and authentication
+
+Accounts live in the same SQLite database as the items. A password is hashed
+with PBKDF2-HMAC-SHA256 and a per-account salt (`app/core/security.py`); the
+iteration count travels inside the hash, so it can be raised later without
+invalidating existing rows. Signing in issues a random 32-byte token whose
+SHA-256 digest is the only thing stored, delivered as an `httpOnly`,
+`SameSite=Lax` cookie.
+
+The first account may always be created, so a fresh install has a way in. It also
+adopts the items saved through the API key before accounts existed, so an
+existing library does not disappear on the first sign-in. Every later account
+needs `AUTH_ALLOW_REGISTRATION=true` or the CLI:
+
+```powershell
+cd backend
+uv run python -m app.cli.bootstrap-user you@example.com
+```
+
+Item and usage routes accept two credentials: a session cookie, whose user id
+becomes the item owner, and the static `API_KEY` header, which keeps working for
+scripts and `curl` and maps to `API_KEY_OWNER_ID`. Every item query is scoped by
+owner, so one account cannot read or delete another's screenshots. Failed sign-in
+attempts answer identically whether or not the address exists, and login and
+registration are rate limited per client IP.
 
 ## How a screenshot moves through the system
 
 ~~~mermaid
 flowchart LR
-    A[Client with API key] --> B[FastAPI request limits and ownership]
+    A[Browser with a session cookie] --> B[FastAPI request limits and ownership]
     B --> C[Image firewall]
     C --> D[Sanitized PNG stored locally]
     D --> E[Pending item in SQLite]
@@ -68,9 +99,9 @@ uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8000
 ~~~
 
-Keep the Gemini key and API key in an ignored local environment file or a secret manager for repeat use. Never commit them. If `backend/.env` already exists, add or update these settings without replacing its other contents. The API key is required for item and usage endpoints; `/api/v1/health` and `/api/v1/ready` remain public for probes. Readiness reports `api_auth: unconfigured` when no API key is configured.
+Keep the Gemini key and API key in an ignored local environment file or a secret manager for repeat use. Never commit them. If `backend/.env` already exists, add or update these settings without replacing its other contents. `API_KEY` is optional once accounts exist; with neither an account nor a key configured, item and usage endpoints answer 401. `/api/v1/health` and `/api/v1/ready` remain public for probes, and readiness reports `api_auth` and `session_auth` separately.
 
-In a second PowerShell window, also from `backend/`, load the API key from the ignored environment file, then upload the bundled demo image and poll its status:
+In a second PowerShell window, also from `backend/`, load the API key from the ignored environment file, then upload the bundled demo image and poll its status. The `curl` examples use the key because a shell has no browser cookie jar; the web app signs in instead.
 
 ~~~powershell
 $credentials = Get-Content .env -Raw | ConvertFrom-StringData
@@ -97,10 +128,16 @@ Set `ANALYSIS_ENABLED=false` to disable analysis for all uploads. This global se
 
 ## API
 
-All paths below are under `/api/v1`. Send the service key in the `X-API-Key` header for item and usage routes. Every item lookup is scoped to the owner associated with that key. An item owned by another identity is returned as not found.
+All paths below are under `/api/v1`. Item and usage routes accept either the session cookie from `/auth/login` or the service key in the `X-API-Key` header. Every item lookup is scoped to the owner behind that credential. An item owned by another identity is returned as not found.
 
 | Method | Path | Purpose |
 |---|---|---|
+| GET | `/auth/status` | Public: whether registration is open and how many accounts exist |
+| POST | `/auth/register` | Create an account and sign in; open for the first account, or when `AUTH_ALLOW_REGISTRATION` is set |
+| POST | `/auth/login` | Exchange email and password for a session cookie |
+| GET | `/auth/me` | The signed-in account, or 401; an API-key caller has no account |
+| POST | `/auth/logout` | Revoke this session and clear the cookie |
+| POST | `/auth/logout-all` | Revoke every session for the account |
 | POST | `/items` | Upload a screenshot; optional `skip_analysis`; returns 202 |
 | GET | `/items/{id}` | Read item status and metadata |
 | GET | `/items` | List and search; supports `status`, `label`, `q`, `limit` and `cursor` |
@@ -110,7 +147,7 @@ All paths below are under `/api/v1`. Send the service key in the `X-API-Key` hea
 | DELETE | `/items/{id}` | Delete the item image and row |
 | GET | `/usage` | Read token, call, cache and estimated-cost summaries |
 | GET | `/health` | Public liveness probe |
-| GET | `/ready` | Public component report; database, storage and API-key configuration determine the ready status |
+| GET | `/ready` | Public component report; database, storage and at least one credential path determine the ready status |
 
 Item states are `pending`, `processing`, `ready`, `failed` and `deferred`. Errors use a generic envelope with a stable code and request ID. Full item metadata and image bytes are never returned in error messages.
 
@@ -122,8 +159,15 @@ Settings can be supplied as environment variables or in `backend/.env`. Environm
 
 | Variable | Default | Purpose |
 |---|---:|---|
-| `API_KEY` | unset | Required shared key for item and usage routes |
+| `API_KEY` | unset | Optional shared key for item and usage routes; the browser uses a session cookie instead |
 | `API_KEY_OWNER_ID` | `legacy-owner` | Stable owner ID associated with the single configured key; keep it stable after migration |
+| `AUTH_ALLOW_REGISTRATION` | `false` | Allow account creation beyond the first one |
+| `AUTH_SESSION_TTL_DAYS` | 30 | Session cookie lifetime |
+| `AUTH_COOKIE_NAME` | `cs_session` | Session cookie name |
+| `AUTH_COOKIE_SECURE` | `false` | Mark the cookie `Secure`; set true when serving over HTTPS |
+| `AUTH_PASSWORD_MIN_LENGTH` | 10 | Minimum password length |
+| `PASSWORD_HASH_ITERATIONS` | 600000 | PBKDF2-HMAC-SHA256 iterations for new password hashes |
+| `LOGIN_RATE_LIMIT` | 10 per window | Sign-in and registration attempts allowed per client IP |
 | `GEMINI_API_KEY` | unset | Gemini Developer API key; extraction is unavailable without it |
 | `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Extraction model |
 | `GEMINI_MEDIA_RESOLUTION` | `MEDIUM` | Image resolution sent to Gemini |
@@ -192,7 +236,8 @@ Synthetic sets exercise the code path, not screenshot quality. For useful accura
 
 ## Known limitations
 
-- Authentication is one static API key mapped to one owner. It is not user accounts, key rotation, or multi-tenant identity management.
+- Accounts are email plus password with no password reset by email, no second factor, and no roles. Sessions are revoked by signing out, signing out everywhere, or expiry; there is no rotation or reuse detection.
+- The static `API_KEY` remains an alternative credential for scripts and maps to one owner id that is not an account.
 - Background jobs use FastAPI in-process tasks. Startup recovery handles interrupted work, but there is no durable distributed queue.
 - Rate limits are process-local and reset when the service restarts. They are not shared between workers.
 - Storage and database defaults are local disk and SQLite; production object storage, database operations, HTTPS termination and secret management are deployment responsibilities.
