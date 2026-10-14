@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Curated Space Runtime Architecture",
+    "output": ".archify/architecture-curated-space-runtime-20261013-211703/curated-space-runtime.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "035ebc4cc639c51ba5bfceb853f4edd907faca86"
+    }
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Web client",
+      "sublabel": "Screenshot library",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        150,
+        66
+      ],
+      "sources": [
+        {
+          "path": "frontend/src/lib/api.ts",
+          "line": 115,
+          "end_line": 140
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI application",
+      "sublabel": "/api/v1",
+      "pos": [
+        250,
+        270
+      ],
+      "size": [
+        160,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/main.py",
+          "line": 120,
+          "end_line": 153
+        },
+        {
+          "path": "backend/app/api/routes/items.py",
+          "line": 46,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "firewall",
+      "type": "security",
+      "label": "Image firewall",
+      "sublabel": "Bounded decode + sanitize",
+      "pos": [
+        470,
+        270
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/image_firewall.py",
+          "line": 151,
+          "end_line": 183
+        }
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "backend",
+      "label": "Background job runner",
+      "sublabel": "In-process, bounded",
+      "pos": [
+        700,
+        270
+      ],
+      "size": [
+        175,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/jobs.py",
+          "line": 32,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "type": "backend",
+      "label": "Analysis pipeline",
+      "sublabel": "Cache → extract → classify",
+      "pos": [
+        940,
+        270
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 56,
+          "end_line": 129
+        },
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 231,
+          "end_line": 255
+        }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "external",
+      "label": "Google Gemini API",
+      "sublabel": "Structured image metadata",
+      "pos": [
+        940,
+        460
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/extraction/gemini.py",
+          "line": 144,
+          "end_line": 151
+        }
+      ]
+    },
+    {
+      "id": "classifier",
+      "type": "backend",
+      "label": "Local classifier",
+      "sublabel": "TF-IDF + LinearSVC",
+      "pos": [
+        1190,
+        270
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/classification/sklearn_svc.py",
+          "line": 136,
+          "end_line": 153
+        },
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 231,
+          "end_line": 255
+        }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite database",
+      "sublabel": "Items, cache, usage",
+      "pos": [
+        1190,
+        460
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/db/session.py",
+          "line": 11,
+          "end_line": 34
+        },
+        {
+          "path": "backend/app/api/routes/items.py",
+          "line": 71,
+          "end_line": 83
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "label": "Local image storage",
+      "sublabel": "Sanitized PNG blobs",
+      "pos": [
+        470,
+        460
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/storage.py",
+          "line": 16,
+          "end_line": 42
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Curated Space trusted runtime and local data",
+      "wraps": [
+        "api",
+        "firewall",
+        "jobs",
+        "pipeline",
+        "classifier",
+        "sqlite",
+        "disk"
+      ],
+      "pad": 26
+    }
+  ],
+  "connections": [
+    {
+      "id": "upload",
+      "from": "browser",
+      "to": "api",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sanitize",
+      "from": "api",
+      "to": "firewall",
+      "label": "Bound and sanitize bytes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "store-image",
+      "from": "api",
+      "to": "disk",
+      "label": "Write sanitized image"
+    },
+    {
+      "id": "create-record",
+      "from": "api",
+      "to": "sqlite",
+      "label": "Create pending item"
+    },
+    {
+      "id": "enqueue",
+      "from": "api",
+      "to": "jobs",
+      "label": "Schedule after 202",
+      "variant": "emphasis"
+    },
+    {
+      "id": "run-analysis",
+      "from": "jobs",
+      "to": "pipeline",
+      "label": "Analyze",
+      "variant": "emphasis"
+    },
+    {
+      "id": "read-image",
+      "from": "pipeline",
+      "to": "disk",
+      "label": "Read image for analysis"
+    },
+    {
+      "id": "provider-request",
+      "from": "pipeline",
+      "to": "gemini",
+      "label": "Send model input",
+      "variant": "emphasis"
+    },
+    {
+      "id": "provider-result",
+      "from": "gemini",
+      "to": "pipeline",
+      "label": "Validated metadata",
+      "variant": "emphasis"
+    },
+    {
+      "id": "local-prediction",
+      "from": "pipeline",
+      "to": "classifier",
+      "label": "Labels"
+    },
+    {
+      "id": "persist-result",
+      "from": "pipeline",
+      "to": "sqlite",
+      "label": "Save result + usage",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Primary request path",
+      "items": [
+        "The browser posts a multipart screenshot; the API sanitizes it, stores the image and pending row, then returns 202.",
+        "An in-process bounded job runs the pipeline; the pipeline reads the image, calls Gemini, optionally predicts local labels, and persists the result."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Trust and input handling",
+      "items": [
+        "The client is outside the trusted application boundary; image size and decoded content are checked before storage.",
+        "The configured Gemini provider is an external boundary. Its API key is held by the backend; local classification stays in the runtime."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Runtime and persistence",
+      "items": [
+        "FastAPI owns the request routes and startup recovery; background work uses FastAPI BackgroundTasks with a concurrency bound.",
+        "SQLite stores item metadata, analysis cache, and usage records. Local disk stores sanitized image bytes under opaque keys.",
+        "Classification is a challenger: unavailable or failed predictions do not prevent extracted items from reaching ready."
+      ]
+    }
+  ]
+}

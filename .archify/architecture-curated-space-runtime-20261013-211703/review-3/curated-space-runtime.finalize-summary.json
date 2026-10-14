@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\SUYASH\\Documents\\curated-space\\.archify\\architecture-curated-space-runtime-20261013-211703\\candidate.json",
+    "sha256": "447efc0892249d81337bf3f56b0a408eeaeb99f2b485610cc3cc31cf9b44d3f2",
+    "bytes": 7575
+  },
+  "artifact": {
+    "path": "C:\\Users\\SUYASH\\Documents\\curated-space\\.archify\\architecture-curated-space-runtime-20261013-211703\\curated-space-runtime.html",
+    "sha256": "0451c4766da4a839687e085dca213478f869b795d8e82fdfefd275a2c7ef0bc1",
+    "bytes": 769687
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\SUYASH\\Documents\\curated-space\\.archify\\architecture-curated-space-runtime-20261013-211703\\review-3\\curated-space-runtime.finalize.json",
+    "summaryReceipt": "C:\\Users\\SUYASH\\Documents\\curated-space\\.archify\\architecture-curated-space-runtime-20261013-211703\\review-3\\curated-space-runtime.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\SUYASH\\Documents\\curated-space\\.archify\\architecture-curated-space-runtime-20261013-211703\\review-3\\curated-space-runtime.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-13T15:49:22.678Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 5266,
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 2,
+      "routesOverSuggestedBends": 2
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "store-image",
+            "from": "api",
+            "to": "disk",
+            "label": "Write sanitized image",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "create-record",
+            "from": "api",
+            "to": "sqlite",
+            "label": "Create pending item",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "point": [
+            344,
+            360
+          ],
+          "sharedNode": "api"
+        },
+        {
+          "left": {
+            "id": "create-record",
+            "from": "api",
+            "to": "sqlite",
+            "label": "Create pending item",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "read-image",
+            "from": "pipeline",
+            "to": "disk",
+            "label": "Read image for analysis",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "point": [
+            916,
+            436
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "store-image",
+            "from": "api",
+            "to": "disk",
+            "label": "Write sanitized image",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "bends": 3,
+          "stretch": 1
+        },
+        {
+          "relationship": {
+            "id": "provider-request",
+            "from": "pipeline",
+            "to": "gemini",
+            "label": "Send model input",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "bends": 3,
+          "stretch": 1
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "api → disk and api → sqlite cross next to api: move node disk or sqlite so the two reach api from different sides (for example one level with it, one directly above or below it).",
+      "api → sqlite crosses pipeline → disk: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "api → disk needs 3 bends: move node api or disk so they share a row or column with matching centers, or sit diagonally with a clear corner.",
+      "pipeline → gemini needs 3 bends: move node pipeline or gemini so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

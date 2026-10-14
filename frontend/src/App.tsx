@@ -6,7 +6,7 @@ import { AppShell } from '@/components/AppShell'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { ItemPage } from '@/pages/ItemPage'
 import { LoginPage } from '@/pages/LoginPage'
-import { UsagePage } from '@/pages/UsagePage'
+import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { AuthProvider } from '@/hooks/useAuth'
 import { useAuth } from '@/lib/auth-context'
@@ -72,7 +72,10 @@ const router = createBrowserRouter([
     element: <RequireAccount />,
     children: [
       { index: true, element: <LibraryPage /> },
-      { path: 'usage', element: <UsagePage /> },
+      { path: 'settings', element: <SettingsPage /> },
+      // Usage is now a section of settings, so old links land on the section
+      // that replaced it instead of a dead end.
+      { path: 'usage', element: <Navigate to="/settings" replace /> },
       { path: 'item/:id', element: <ItemPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/mark.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f2f2f1" id="theme-color" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Loaded as a link rather than a CSS @import: an @import is discovered only
+      after this document's own stylesheet arrives, which delays the first paint.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;450;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap"
+    />
     <meta
       name="description"
       content="Curated Space is a personal library of saved screenshots, described and tagged as you save them."
@@ -20,6 +31,11 @@
             window.matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.classList.toggle('dark', dark)
         document.documentElement.classList.toggle('light', !dark)
+        // The stored theme can disagree with the OS, so the browser UI is told
+        // the same answer rather than left to guess from prefers-color-scheme.
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#101112' : '#f2f2f1')
       } catch {}
     </script>
   </head>

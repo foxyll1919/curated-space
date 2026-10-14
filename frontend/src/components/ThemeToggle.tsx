@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button'
 
 const STORAGE_KEY = 'curated-space-theme'
 
+/** Kept in step with --background in index.css; the browser UI is told, not asked. */
+const THEME_COLOR: Record<Theme, string> = { light: '#f2f2f1', dark: '#101112' }
+
 type Theme = 'light' | 'dark'
 
 function currentTheme(): Theme {
@@ -19,6 +22,9 @@ export function ThemeToggle() {
     const next = currentTheme() === 'dark' ? 'light' : 'dark'
     document.documentElement.classList.toggle('dark', next === 'dark')
     document.documentElement.classList.toggle('light', next === 'light')
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', THEME_COLOR[next])
     try {
       localStorage.setItem(STORAGE_KEY, next)
     } catch {

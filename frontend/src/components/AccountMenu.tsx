@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,10 @@ import { useAuth } from '@/lib/auth-context'
 
 /**
  * The signed-in account, and the way out of it.
+ *
+ * Settings lives here rather than in the top bar: it is the account's own
+ * business, not a top-level destination, so it stays out of the way until
+ * asked for.
  *
  * "Sign out everywhere" exists because the session is a cookie with a month of
  * life: on a shared machine, signing out of this browser is not enough.
@@ -36,6 +41,10 @@ export function AccountMenu() {
           <span className="block text-sm">Signed in</span>
           <span className="block truncate text-xs text-muted-foreground">{account.email}</span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/settings">Settings</Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={isSubmitting}
