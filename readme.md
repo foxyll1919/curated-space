@@ -146,6 +146,10 @@ All paths below are under `/api/v1`. Item and usage routes accept either the ses
 | POST | `/items/{id}/reanalyze` | Queue analysis again, subject to cache and budget |
 | DELETE | `/items/{id}` | Delete the item image and row |
 | GET | `/usage` | Read token, call, cache and estimated-cost summaries |
+| GET | `/intelligence/search?q=...&mode=hybrid` | Keyword, semantic or hybrid screenshot retrieval |
+| POST | `/intelligence/ask` | Grounded RAG answer with screenshot citations |
+| POST | `/intelligence/agent` | LangChain tool + LangGraph supervisor/retrieval/answer workflow |
+| POST | `/intelligence/reindex` | Generate missing embeddings for the signed-in owner's ready items |
 | GET | `/health` | Public liveness probe |
 | GET | `/ready` | Public component report; database, storage and at least one credential path determine the ready status |
 
@@ -197,7 +201,7 @@ Settings can be supplied as environment variables or in `backend/.env`. Environm
 | `GEMINI_MAX_SCHEMA_REPAIRS` | 1 | Schema repair attempts |
 | `GEMINI_RETURN_LABELS` | `false` | Benchmark-only Gemini taxonomy output; off by default |
 
-`ALLOWED_ORIGINS` is a JSON array, for example `["http://localhost:5173"]`. CORS credentials are disabled. Upload and reanalyze limits are in-process, so multiple API workers do not share counts.
+`ALLOWED_ORIGINS` is a JSON array, for example `["http://localhost:5173"]`. It enables credentialed cross-origin browser access for the listed app origin. Upload and reanalyze limits are in-process, so multiple API workers do not share counts.
 
 ## Cost and provider data handling
 
@@ -233,6 +237,34 @@ uv run --project ..\backend python -m evals.run --set evals\sets\synthetic --tax
 ~~~
 
 Synthetic sets exercise the code path, not screenshot quality. For useful accuracy or macro-F1, label a separate screenshot set and keep its gold labels out of training.
+
+Retrieval quality uses a separate metric layer for Recall@5, Recall@10 and MRR.
+The synthetic suite contains 30 realistic screenshot-library questions, but it does
+not establish quality against real user data. Run it with:
+
+~~~powershell
+cd backend
+uv run pytest tests/test_retrieval_evaluation.py -q --basetemp .pytest-retrieval
+~~~
+
+For a private local export, evaluate production-matching FTS5/BM25 retrieval
+without sending screenshot metadata or queries to an external provider:
+
+~~~powershell
+cd backend
+uv run python -m app.cli.evaluate_retrieval --items "$HOME\Downloads\items_export.jsonl" --labels "$HOME\Downloads\retrieval_eval_set.csv"
+~~~
+
+The report includes overall and query-type metrics plus the no-result false-positive
+rate. Semantic and hybrid results require embeddings for the exported item IDs;
+the evaluator will not generate them by sending this export to Gemini.
+
+Owner-provided local export baseline (2026-11-25): 100 candidates and 50 queries
+(44 answerable, 6 no-result). FTS5/BM25 measured Recall@5/Recall@10/MRR of
+0.205/0.205/0.205 overall and 0.562/0.562/0.562 on keyword queries. Semantic
+and multi-screenshot query subsets were 0.000 for keyword search, as expected
+for this lexical baseline. No-result false-positive rate was 0.000. These are
+real-label keyword baseline metrics, not semantic or hybrid quality claims.
 
 ## Known limitations
 

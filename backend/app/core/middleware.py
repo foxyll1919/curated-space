@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Awaitable, Callable
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -12,9 +13,16 @@ from app.core.logging import request_id_context
 class RequestSecurityMiddleware:
     """Bound request bodies, attach a request id and add browser security headers."""
 
-    def __init__(self, app: ASGIApp, *, max_body_bytes: int) -> None:
+    def __init__(
+        self,
+        app: ASGIApp,
+        *,
+        max_body_bytes: int,
+        allowed_origins: list[str] | None = None,
+    ) -> None:
         self.app = app
         self.max_body_bytes = max_body_bytes
+        self.allowed_origins = frozenset(allowed_origins or [])
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -31,7 +39,6 @@ class RequestSecurityMiddleware:
             request_id = str(uuid4())
         state = scope.setdefault("state", {})
         state["request_id"] = request_id
-        token = request_id_context.set(request_id)
 
         async def secured_send(message: Message) -> None:
             if message["type"] == "http.response.start":
@@ -49,6 +56,20 @@ class RequestSecurityMiddleware:
                 message["headers"] = response_headers
             await send(message)
 
+        if scope["method"].upper() in {"POST", "PUT", "PATCH", "DELETE"}:
+            origin_bytes = headers.get(b"origin")
+            if origin_bytes:
+                origin = origin_bytes.decode("ascii", errors="ignore").rstrip("/")
+                if origin == "null":
+                    await self._origin_forbidden(secured_send, request_id)
+                    return
+                host = headers.get(b"host", b"").decode("ascii", errors="ignore")
+                same_origin = bool(host) and origin == f"{urlsplit(origin).scheme}://{host}"
+                if not same_origin and origin not in self.allowed_origins:
+                    await self._origin_forbidden(secured_send, request_id)
+                    return
+
+        token = request_id_context.set(request_id)
         content_length = headers.get(b"content-length")
         try:
             if content_length:
@@ -87,6 +108,31 @@ class RequestSecurityMiddleware:
             await self.app(scope, replay_body, secured_send)
         finally:
             request_id_context.reset(token)
+
+    @staticmethod
+    async def _origin_forbidden(
+        send: Callable[[Message], Awaitable[None]], request_id: str
+    ) -> None:
+        payload = json.dumps(
+            {
+                "error": {
+                    "code": "forbidden",
+                    "message": "The request origin is not allowed.",
+                    "request_id": request_id,
+                }
+            }
+        ).encode()
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 403,
+                "headers": [
+                    (b"content-type", b"application/json"),
+                    (b"content-length", str(len(payload)).encode()),
+                ],
+            }
+        )
+        await send({"type": "http.response.body", "body": payload})
 
     @staticmethod
     async def _too_large(send: Callable[[Message], Awaitable[None]], request_id: str) -> None:

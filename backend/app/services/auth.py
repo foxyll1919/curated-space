@@ -17,11 +17,19 @@ from typing import Any, cast
 from uuid import uuid4
 
 from sqlalchemy import CursorResult, func, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.core.errors import AuthenticationError, BadRequestError, ConflictError
-from app.core.security import hash_password, hash_session_token, new_session_token, verify_password
+from app.core.security import (
+    hash_password,
+    hash_session_token,
+    dummy_password_hash,
+    new_session_token,
+    password_hash_needs_upgrade,
+    verify_password,
+)
 from app.db.models import Item, Session as SessionRow, User
 
 
@@ -85,11 +93,14 @@ def create_user(
         password_hash=hash_password(password, iterations=settings.password_hash_iterations),
     )
     session.add(user)
-    session.flush()
-
-    if is_first_user:
-        _claim_legacy_items(session, user, legacy_owner_id=settings.api_key_owner_id)
-    session.commit()
+    try:
+        session.flush()
+        if is_first_user:
+            _claim_legacy_items(session, user, legacy_owner_id=settings.api_key_owner_id)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise ConflictError("An account already exists for that address.") from None
     logger.info("user_created", extra={"stage": "auth", "user_id": user.id})
     return user, is_first_user
 
@@ -113,11 +124,25 @@ def authenticate(session: Session, settings: Settings, *, email: str, password: 
     """Return the user for valid credentials, else raise the same 401 for all failures."""
     user = find_user(session, email)
     # Hash a dummy value when the address is unknown so the response time does
-    # not reveal which addresses exist.
-    encoded = user.password_hash if user is not None else "pbkdf2_sha256$1$AAAA$AAAA"
+    # not reveal which addresses exist. Keep the dummy at the real configured
+    # PBKDF2 cost to avoid turning unknown-address timing into an oracle.
+    encoded = (
+        user.password_hash
+        if user is not None
+        else dummy_password_hash(iterations=settings.password_hash_iterations)
+    )
     valid = verify_password(password, encoded)
     if user is None or not valid:
         raise AuthenticationError()
+    if password_hash_needs_upgrade(
+        user.password_hash,
+        iterations=settings.password_hash_iterations,
+    ):
+        user.password_hash = hash_password(
+            password,
+            iterations=settings.password_hash_iterations,
+        )
+        session.commit()
     return user
 
 

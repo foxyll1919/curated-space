@@ -119,6 +119,30 @@ class AnalysisCache(Base):
     )
 
 
+class ItemEmbedding(Base):
+    __tablename__ = "item_embeddings"
+    __table_args__ = (
+        Index("ix_item_embeddings_item_id", "item_id"),
+        Index("ix_item_embeddings_model", "model"),
+    )
+
+    item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("items.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    model: Mapped[str] = mapped_column(String(128), nullable=False)
+    text_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    dimensions: Mapped[int] = mapped_column(Integer, nullable=False)
+    vector: Mapped[list[float]] = mapped_column(JSON, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utcnow,
+        server_default=func.current_timestamp(),
+    )
+
+
 class LLMUsage(Base):
     __tablename__ = "llm_usage"
     __table_args__ = (

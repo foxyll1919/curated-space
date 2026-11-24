@@ -6,8 +6,11 @@ import { ServerStrip } from '@/components/ServerStrip'
 import { AccountMenu } from '@/components/AccountMenu'
 import { cn } from 'cn'
 
-/** Only one top-level destination: settings is reached through the account menu. */
-const NAV = [{ to: '/', label: 'Library', end: true }]
+/** Top-level destinations. Settings is reached through the account menu. */
+const NAV = [
+  { to: '/', label: 'Library', end: true },
+  { to: '/ask', label: 'Ask', end: true },
+]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()

@@ -11,7 +11,7 @@ from curated_ml.text import build_text
 
 from app.core.config import Settings
 from app.core.errors import AppError, BadRequestError, ExtractionError
-from app.db.models import AnalysisCache, Item
+from app.db.models import AnalysisCache, Item, ItemEmbedding
 from app.services.analysis_cache import (
     cache_key,
     lookup as cache_lookup,
@@ -27,6 +27,7 @@ from app.services.extraction.base import (
 )
 from app.services.extraction.schema import ExtractedMetadata
 from app.services.image_firewall import prepare_model_input
+from app.services.embeddings import EmbeddingProvider, embedding_text, text_hash
 from app.services.storage import Storage
 from app.services.usage import record_cache_hit, record_usage
 
@@ -45,12 +46,14 @@ class PipelineContext:
         storage: Storage,
         session_factory: sessionmaker[Session],
         classifier: Classifier | None = None,
+        embedding_provider: EmbeddingProvider | None = None,
     ) -> None:
         self.settings = settings
         self.extractor = extractor
         self.storage = storage
         self.session_factory = session_factory
         self.classifier = classifier
+        self.embedding_provider = embedding_provider
 
 
 def process_item(item_id: str, context: PipelineContext) -> None:
@@ -225,6 +228,37 @@ def _complete(
         item.error_code = None
         item.analyzed_at = started
         _apply_classification(item, metadata, context)
+        session.commit()
+        _embed_item(item_id, metadata, context)
+
+
+def _embed_item(
+    item_id: str,
+    metadata: ExtractedMetadata,
+    context: PipelineContext,
+) -> None:
+    provider = context.embedding_provider
+    if provider is None or not provider.is_configured:
+        return
+    text = embedding_text(metadata.title, metadata.description, metadata.tags)
+    if not text:
+        return
+    try:
+        vector = provider.embed_text(text)
+    except Exception as exc:
+        logger.warning("item_embedding_failed", extra={"item_id": item_id, "stage": "embedding"})
+        logger.debug("item_embedding_detail", exc_info=exc)
+        return
+    with context.session_factory() as session:
+        existing = session.get(ItemEmbedding, item_id)
+        if existing is None:
+            existing = ItemEmbedding(item_id=item_id)
+            session.add(existing)
+        existing.model = provider.model
+        existing.text_hash = text_hash(text)
+        existing.dimensions = len(vector)
+        existing.vector = vector
+        existing.updated_at = datetime.now(UTC)
         session.commit()
 
 

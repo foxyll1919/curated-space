@@ -37,6 +37,26 @@ export type UsageWindow = components['schemas']['UsageWindow']
 export type Ready = components['schemas']['ReadyResponse']
 export type Health = components['schemas']['HealthResponse']
 export type ImageInfo = components['schemas']['ImageInfo']
+export type AskSource = {
+  id: string
+  title: string | null
+  description: string | null
+  tags: string[]
+  keyword_rank: number | null
+  semantic_rank: number | null
+  semantic_score: number | null
+}
+export type AskResponse = {
+  answer: string
+  sources: AskSource[]
+  insufficient_evidence: boolean
+  tool_trace?: string[]
+}
+export type SearchResponse = {
+  query: string
+  items: AskSource[]
+  mode: string
+}
 
 /**
  * The backend documents five item states. `pending` and `processing` are the
@@ -118,6 +138,26 @@ export const api = {
   ready: () => request<Ready>('/ready'),
 
   usage: () => request<Usage>('/usage'),
+
+  ask: (
+    question: string,
+    history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+  ) =>
+    request<AskResponse>('/intelligence/agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, history }),
+    }),
+
+  searchIntelligence: (q: string, mode: 'keyword' | 'semantic' | 'hybrid' = 'hybrid') =>
+    request<SearchResponse>(
+      `/intelligence/search?${new URLSearchParams({ q, mode }).toString()}`,
+    ),
+
+  reindex: () =>
+    request<{ indexed: number; failed: number; model: string }>('/intelligence/reindex', {
+      method: 'POST',
+    }),
 
   listItems: async (query: ItemQuery = {}) => {
     const page = await request<components['schemas']['ItemListResponse']>(

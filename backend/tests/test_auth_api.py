@@ -173,6 +173,28 @@ def test_expired_session_is_refused_and_cleaned_up(make_client, auth_settings):
         engine.dispose()
 
 
+def test_cross_origin_state_change_is_rejected(make_client, migrated_settings):
+    settings = migrated_settings.model_copy(
+        update={"api_key": None, "allowed_origins": ["https://trusted.example"]}
+    )
+    client = make_client(settings)
+
+    rejected = client.post(
+        "/api/v1/auth/register",
+        json=REGISTRATION,
+        headers={"Origin": "https://evil.example"},
+    )
+    assert rejected.status_code == 403
+    assert rejected.json()["error"]["code"] == "forbidden"
+
+    allowed = client.post(
+        "/api/v1/auth/register",
+        json=REGISTRATION,
+        headers={"Origin": "https://trusted.example"},
+    )
+    assert allowed.status_code == 201
+
+
 def test_login_is_rate_limited_per_ip(make_client, migrated_settings):
     settings = migrated_settings.model_copy(
         update={"api_key": None, "login_rate_limit": 3, "rate_limit_window_seconds": 60}
@@ -274,6 +296,14 @@ def test_verify_password_rejects_a_corrupted_hash():
     assert not verify_password("anything", "not-a-hash")
     assert not verify_password("anything", "pbkdf2_sha256$notanint$AAAA$AAAA")
     assert not verify_password("anything", "bcrypt$600000$AAAA$AAAA")
+
+
+def test_dummy_password_hash_is_well_formed_but_never_matches():
+    from app.core.security import dummy_password_hash
+
+    encoded = dummy_password_hash(iterations=1_000)
+    assert encoded.startswith("pbkdf2_sha256$1000$")
+    assert not verify_password("a real password", encoded)
 
 
 def test_hash_password_round_trips():

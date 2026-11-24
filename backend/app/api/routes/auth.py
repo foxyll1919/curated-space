@@ -41,6 +41,7 @@ SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 
 
 def set_session_cookie(response: Response, settings: Settings, token: str) -> None:
+    response.headers["Cache-Control"] = "no-store"
     response.set_cookie(
         key=settings.auth_cookie_name,
         value=token,
@@ -50,11 +51,13 @@ def set_session_cookie(response: Response, settings: Settings, token: str) -> No
         # `lax` keeps the cookie out of cross-site form posts while still
         # surviving a normal navigation back into the app.
         samesite="lax",
-        secure=settings.auth_cookie_secure,
+        secure=settings.auth_cookie_secure
+        or settings.environment.lower() in {"production", "prod"},
     )
 
 
 def clear_session_cookie(response: Response, settings: Settings) -> None:
+    response.headers["Cache-Control"] = "no-store"
     response.delete_cookie(key=settings.auth_cookie_name, path=COOKIE_PATH)
 
 
@@ -103,8 +106,9 @@ def login(
 
 
 @router.get("/me", response_model=UserResponse)
-def me(user: UserDep) -> UserResponse:
+def me(user: UserDep, response: Response) -> UserResponse:
     """The signed-in account, or 401. The client calls this to decide where to route."""
+    response.headers["Cache-Control"] = "no-store"
     return UserResponse.from_model(user)
 
 

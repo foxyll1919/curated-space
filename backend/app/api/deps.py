@@ -16,6 +16,7 @@ from app.services.extraction.base import MetadataExtractor
 from app.services.jobs import JobRunner
 from app.services.pipeline import PipelineContext
 from app.services.storage import Storage
+from app.services.embeddings import EmbeddingProvider
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -81,6 +82,10 @@ def get_storage(request: Request) -> Storage:
     return request.app.state.storage
 
 
+def get_embedding_provider(request: Request) -> EmbeddingProvider:
+    return request.app.state.embedding_provider
+
+
 def get_job_runner(request: Request) -> JobRunner:
     return request.app.state.job_runner
 
@@ -102,4 +107,5 @@ def get_pipeline_context(
         storage=storage,
         session_factory=request.app.state.session_factory,
         classifier=classifier,
+        embedding_provider=request.app.state.embedding_provider,
     )

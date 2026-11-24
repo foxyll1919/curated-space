@@ -42,6 +42,11 @@ def hash_password(password: str, *, iterations: int = DEFAULT_ITERATIONS) -> str
     return f"{ALGORITHM}${iterations}${_b64(salt)}${_b64(digest)}"
 
 
+def dummy_password_hash(*, iterations: int) -> str:
+    """Return a deterministic invalid hash to equalize unknown-user login work."""
+    return f"{ALGORITHM}${iterations}${_b64(bytes(SALT_BYTES))}${_b64(bytes(32))}"
+
+
 def verify_password(password: str, encoded: str) -> bool:
     """Constant-time verification that never raises on a malformed hash.
 
@@ -60,6 +65,14 @@ def verify_password(password: str, encoded: str) -> bool:
         return False
     candidate = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
     return hmac.compare_digest(candidate, expected)
+
+
+def password_hash_needs_upgrade(encoded: str, *, iterations: int) -> bool:
+    try:
+        algorithm, iterations_raw, _salt, _digest = encoded.split("$")
+        return algorithm == ALGORITHM and int(iterations_raw) != iterations
+    except (ValueError, TypeError):
+        return False
 
 
 def new_session_token() -> str:

@@ -70,6 +70,8 @@ class Settings(BaseSettings):
     gemini_max_output_tokens: int = 300
     gemini_media_resolution: GeminiMediaResolution = "MEDIUM"
     gemini_thinking_level: GeminiThinkingLevel = "minimal"
+    gemini_embedding_model: str = "gemini-embedding-001"
+    gemini_answer_model: str = "gemini-3.5-flash-lite"
 
     # Bounded retry policy (brief section 7.6). Transport retries are only for
     # 429/5xx/timeouts; `gemini_total_timeout_ms` bounds the whole `extract`

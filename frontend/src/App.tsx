@@ -8,6 +8,7 @@ import { ItemPage } from '@/pages/ItemPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { AskPage } from '@/pages/AskPage'
 import { AuthProvider } from '@/hooks/useAuth'
 import { useAuth } from '@/lib/auth-context'
 import { isApiError } from '@/lib/api'
@@ -72,6 +73,7 @@ const router = createBrowserRouter([
     element: <RequireAccount />,
     children: [
       { index: true, element: <LibraryPage /> },
+      { path: 'ask', element: <AskPage /> },
       { path: 'settings', element: <SettingsPage /> },
       // Usage is now a section of settings, so old links land on the section
       // that replaced it instead of a dead end.

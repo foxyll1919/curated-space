@@ -15,6 +15,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
 from app.api.routes.items import router as items_router
 from app.api.routes.usage import router as usage_router
+from app.api.routes.intelligence import router as intelligence_router
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError
 from app.core.logging import configure_logging
@@ -38,6 +39,7 @@ from app.services.jobs import (
 from app.services.pipeline import PipelineContext
 from app.services.rate_limit import FixedWindowRateLimiter
 from app.services.storage import LocalDiskStorage, Storage
+from app.services.embeddings import GeminiEmbeddingProvider
 
 
 PRODUCTION_ENVIRONMENTS = frozenset({"production", "prod"})
@@ -74,12 +76,14 @@ def create_app(
     app_extractor = extractor or GeminiExtractor(app_settings)
     app_storage = storage or LocalDiskStorage(app_settings.storage_path)
     app_classifier = classifier or build_classifier(app_settings)
+    app_embedding_provider = GeminiEmbeddingProvider(app_settings)
     pipeline_context = PipelineContext(
         settings=app_settings,
         extractor=app_extractor,
         storage=app_storage,
         session_factory=create_session_factory(engine),
         classifier=app_classifier,
+        embedding_provider=app_embedding_provider,
     )
     job_runner = BackgroundJobRunner(app_settings.max_concurrent_analyses)
     recovery_tasks: set[asyncio.Task[None]] = set()
@@ -131,6 +135,7 @@ def create_app(
     app.state.extractor = app_extractor
     app.state.storage = app_storage
     app.state.classifier = app_classifier
+    app.state.embedding_provider = app_embedding_provider
     app.state.pipeline_context = pipeline_context
     app.state.job_runner = job_runner
     app.state.recovery_tasks = recovery_tasks
@@ -145,12 +150,15 @@ def create_app(
         allow_headers=["Content-Type", "X-API-Key", "X-Request-ID"],
     )
     app.add_middleware(
-        RequestSecurityMiddleware, max_body_bytes=app_settings.max_request_body_bytes
+        RequestSecurityMiddleware,
+        max_body_bytes=app_settings.max_request_body_bytes,
+        allowed_origins=app_settings.allowed_origins,
     )
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(items_router, prefix="/api/v1")
     app.include_router(usage_router, prefix="/api/v1")
+    app.include_router(intelligence_router, prefix="/api/v1")
 
     @app.exception_handler(AppError)
     async def handle_app_error(_request: Request, exc: AppError) -> JSONResponse:
