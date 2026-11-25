@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b301f85d-8e49-4239-84f8-c60e27e0b751",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\sequence-local-origin-check-20261125-032522\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\sequence-local-origin-check-20261125-032522\\local-origin-check.html",
+  "specification": {
+    "sha256": "4d2058e42b5ad03386ebcedbf06d41d35e046ec45ba7a59191bf161ba433caaf",
+    "bytes": 6731
+  },
+  "artifact": {
+    "sha256": "6dcdaf6f626b50dd2fa2be3b0aeb77f6037dc5659320f5a52e429c03aa9c860f",
+    "bytes": 763964
+  }
+}

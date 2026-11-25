@@ -1,0 +1,146 @@
+{
+  "schema_version": 2,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "3.2.8 Agent Reasoning State — Single Pass",
+    "subtitle": "The current LangGraph has no iterative reasoning loop.",
+    "output": ".archify/curated-space-diagrams-20261125-033501/3-2-8-agent-state/agent-state.html",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "lanes": [
+    { "id": "main", "label": "Agent Run" },
+    { "id": "terminal", "label": "Terminal Outcomes" }
+  ],
+  "states": [
+    {
+      "id": "request_received",
+      "type": "start",
+      "label": "Question Received",
+      "sublabel": "owner-scoped request",
+      "lane": "main",
+      "col": 0,
+      "sources": [
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 }
+      ]
+    },
+    {
+      "id": "provider_check",
+      "type": "decision",
+      "label": "Provider Configured?",
+      "sublabel": "Gemini available",
+      "lane": "main",
+      "col": 1,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 31, "end_line": 33 },
+        { "path": "backend/app/services/embeddings.py", "line": 56, "end_line": 62 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "type": "active",
+      "label": "Choose Retrieval Strategy",
+      "sublabel": "keyword / semantic / hybrid",
+      "lane": "main",
+      "col": 2,
+      "width": 190,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 61, "end_line": 72 },
+        { "path": "backend/app/services/embeddings.py", "line": 111, "end_line": 129 }
+      ]
+    },
+    {
+      "id": "tool_search",
+      "type": "active",
+      "label": "Invoke Search Tool",
+      "sublabel": "LangChain tool selected by route",
+      "lane": "main",
+      "col": 3,
+      "width": 175,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 36, "end_line": 89 }
+      ]
+    },
+    {
+      "id": "materialize_results",
+      "type": "active",
+      "label": "Materialize Search Results",
+      "sublabel": "retrieval node builds ranked records",
+      "lane": "main",
+      "col": 4,
+      "width": 210,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 74, "end_line": 107 }
+      ]
+    },
+    {
+      "id": "provider_unavailable",
+      "type": "failure",
+      "label": "Provider Unavailable",
+      "sublabel": "configuration message",
+      "lane": "terminal",
+      "col": 1,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 31, "end_line": 33 }
+      ]
+    },
+    {
+      "id": "insufficient_evidence",
+      "type": "neutral",
+      "label": "Insufficient Evidence",
+      "sublabel": "fixed fallback; no answer LLM call",
+      "lane": "terminal",
+      "col": 3,
+      "width": 190,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 108, "end_line": 115 }
+      ]
+    },
+    {
+      "id": "answered",
+      "type": "success",
+      "label": "Answer Returned",
+      "sublabel": "grounded answer + sources",
+      "lane": "terminal",
+      "col": 4,
+      "yOffset": 55,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 108, "end_line": 137 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 }
+      ]
+    }
+  ],
+  "transitions": [
+    { "id": "request-to-check", "from": "request_received", "to": "provider_check", "label": "start run", "labelAt": [226, 135] },
+    { "id": "check-to-unavailable", "from": "provider_check", "to": "provider_unavailable", "label": "not configured", "variant": "security" },
+    { "id": "check-to-supervisor", "from": "provider_check", "to": "supervisor", "label": "configured", "variant": "emphasis", "labelAt": [422, 135] },
+    { "id": "supervisor-to-tool", "from": "supervisor", "to": "tool_search", "label": "strategy selected", "labelAt": [672, 135] },
+    { "id": "tool-to-results", "from": "tool_search", "to": "materialize_results", "label": "IDs returned; retrieval runs again", "labelAt": [924, 135] },
+    { "id": "empty-to-fallback", "from": "materialize_results", "to": "insufficient_evidence", "label": "no matches" },
+    { "id": "results-to-answer", "from": "materialize_results", "to": "answered", "label": "results found; generate answer", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "slate",
+      "title": "No Reasoning Loop",
+      "items": [
+        "The graph edges are START → supervisor → retrieval → answer → END.",
+        "There is no reflection, critique, retry or return edge to the supervisor in the implementation."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Terminal Branches",
+      "items": [
+        "A missing provider returns a configuration message.",
+        "An empty result set returns an insufficient-evidence message without answer generation."
+      ]
+    }
+  ]
+}

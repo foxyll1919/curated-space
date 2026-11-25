@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     # Milestone 9: one configured key maps to one stable owner identity.
     api_key: SecretStr | None = None
     api_key_owner_id: str = "legacy-owner"
+    clerk_jwt_key: str | None = None
 
     # User accounts. Registration is always allowed for the very first account
     # so a fresh install is usable; afterwards it needs `auth_allow_registration`

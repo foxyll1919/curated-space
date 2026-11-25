@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import hmac
 from typing import Annotated
+from uuid import uuid4
 
+from clerk_backend_api.security import authenticate_request
+from clerk_backend_api.security.types import AuthenticateRequestOptions
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session
 
@@ -10,7 +13,7 @@ from app.core.config import Settings
 from app.core.errors import AuthenticationError
 from app.db.models import User
 from app.db.session import get_session
-from app.services.auth import user_for_token
+from app.services.auth import user_for_clerk_id, user_for_token
 from app.services.classification.base import Classifier
 from app.services.extraction.base import MetadataExtractor
 from app.services.jobs import JobRunner
@@ -20,6 +23,52 @@ from app.services.embeddings import EmbeddingProvider
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+def clerk_subject_from_request(request: Request, settings: Settings) -> str:
+    authorization = request.headers.get("Authorization")
+    if authorization is None:
+        raise AuthenticationError()
+    scheme, separator, token = authorization.partition(" ")
+    if scheme != "Bearer" or not separator or not token or token.strip() != token:
+        raise AuthenticationError()
+    if not settings.clerk_jwt_key or not settings.allowed_origins:
+        raise AuthenticationError()
+
+    jwt_key = settings.clerk_jwt_key.replace("\\n", "\n")
+    auth_state = authenticate_request(
+        request,
+        AuthenticateRequestOptions(
+            jwt_key=jwt_key,
+            authorized_parties=settings.allowed_origins,
+            accepts_token=["session_token"],
+        ),
+    )
+    if not auth_state.is_signed_in or not auth_state.payload:
+        raise AuthenticationError()
+    subject = auth_state.payload.get("sub")
+    if not isinstance(subject, str) or not subject:
+        raise AuthenticationError()
+    return subject
+
+
+def _user_from_request_credentials(
+    request: Request, session: Session, settings: Settings
+) -> User | None:
+    if request.headers.get("Authorization") is not None:
+        subject = clerk_subject_from_request(request, settings)
+        user = user_for_clerk_id(session, subject)
+        if user is None:
+            user = User(
+                id=str(uuid4()),
+                email=f"{subject}@clerk.local",
+                password_hash="clerk:" + subject,
+                clerk_user_id=subject,
+            )
+            session.add(user)
+            session.commit()
+        return user
+    return user_for_token(session, request.cookies.get(settings.auth_cookie_name))
 
 
 def get_current_owner(
@@ -35,9 +84,12 @@ def get_current_owner(
     owner id.
     """
     settings: Settings = request.app.state.settings
-    user = user_for_token(session, request.cookies.get(settings.auth_cookie_name))
+    user = _user_from_request_credentials(request, session, settings)
     if user is not None:
         return user.id
+
+    if request.headers.get("Authorization") is not None:
+        raise AuthenticationError()
 
     configured = settings.api_key
     if (
@@ -61,7 +113,7 @@ def get_current_user(request: Request, session: SessionDep) -> User:
     caller has no account to report and is refused instead of being faked.
     """
     settings: Settings = request.app.state.settings
-    user = user_for_token(session, request.cookies.get(settings.auth_cookie_name))
+    user = _user_from_request_credentials(request, session, settings)
     if user is None:
         raise AuthenticationError()
     return user

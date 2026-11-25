@@ -1,25 +1,19 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircleIcon, LogOutIcon, RefreshCwIcon } from 'lucide-react'
+import { AlertCircleIcon, LogOutIcon, RefreshCwIcon, UserIcon } from 'lucide-react'
+import { useClerk, useUser } from '@clerk/react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, type UsageWindow } from '@/lib/api'
-import { useAuth } from '@/lib/auth-context'
 
 /**
  * Everything about the reader that is not the library itself: who is signed in,
  * how to leave, and what the analysis has cost so far.
- *
- * Usage used to live in its own top-level page, which made a single table look
- * like a top-level destination. It is a property of the account, so it belongs
- * here. The route is deep-linkable, so old `/usage` links still land somewhere
- * sensible.
  */
 export function SettingsPage() {
-  const { account, isSubmitting, signOut, signOutEverywhere } = useAuth()
-  const [pendingEverywhere, setPendingEverywhere] = useState(false)
+  const { user, isLoaded } = useUser()
+  const { signOut, openUserProfile } = useClerk()
 
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['usage'],
@@ -47,43 +41,43 @@ export function SettingsPage() {
             Account
           </h2>
           <p className="max-w-prose text-sm text-muted-foreground">
-            This app has no passwords to reset and no profile to edit. Signing out is the whole of
-            it.
+            Manage your profile, security, connected accounts and multi-user sessions through Clerk.
           </p>
         </div>
 
         <dl className="flex flex-col border-t border-border">
-          <Row label="Email" value={account?.email ?? '—'} />
-          <Row label="Member since" value={account ? formatDate(account.created_at) : '—'} />
+          <Row
+            label="Email"
+            value={isLoaded ? (user?.primaryEmailAddress?.emailAddress ?? '—') : 'Loading…'}
+          />
+          <Row
+            label="Member since"
+            value={user?.createdAt ? formatDate(user.createdAt.toISOString()) : '—'}
+          />
         </dl>
 
-        {/* Kept apart from the read-only facts: leaving is not a preference. */}
         <div className="flex flex-col items-start gap-3 border-t border-border pt-4">
           <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
-              disabled={isSubmitting || pendingEverywhere}
+              onClick={() => openUserProfile()}
+            >
+              <UserIcon data-icon="inline-start" aria-hidden="true" />
+              Manage Account & Sessions
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => {
-                void signOut()
+                void signOut({ redirectUrl: '/login' })
               }}
             >
               <LogOutIcon data-icon="inline-start" aria-hidden="true" />
               Sign out
             </Button>
-            <Button
-              variant="outline"
-              disabled={isSubmitting || pendingEverywhere}
-              onClick={() => {
-                setPendingEverywhere(true)
-                void signOutEverywhere().finally(() => setPendingEverywhere(false))
-              }}
-            >
-              Sign out everywhere
-            </Button>
           </div>
           <p className="max-w-prose text-xs text-muted-foreground">
-            The session is a cookie with a month of life. On a shared machine, signing out of this
-            browser is not enough — sign out everywhere revokes every session for the account.
+            Multi-user session switching and profile details can be managed from the account menu
+            or via the button above.
           </p>
         </div>
       </section>
@@ -164,7 +158,6 @@ function Window({ title, window: usage }: { title: string; window: UsageWindow }
         <h3 className="font-mono text-[11px] tracking-wide text-muted-foreground uppercase">
           {title}
         </h3>
-        {/* The one number people come here for, so it leads. */}
         <p className="font-mono text-base tabular-nums text-foreground">
           {formatCost(usage.est_cost_usd)}
         </p>
@@ -197,7 +190,6 @@ function Row({
 }: {
   label: string
   value: string
-  /** 0-100, drawn as a hairline bar so the ratio is readable without colour. */
   meter?: number
 }) {
   return (
@@ -226,12 +218,10 @@ function formatInt(value: number): string {
   return value.toLocaleString()
 }
 
-/** A cost is not a bill, so the fraction is fixed rather than rounded away. */
 function formatCost(value: number): string {
   return COST.format(value)
 }
 
-/** Date only: a member-since line does not need a clock. */
 function formatDate(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value

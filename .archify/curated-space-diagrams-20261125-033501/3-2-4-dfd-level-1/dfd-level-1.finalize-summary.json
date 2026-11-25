@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "dataflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\candidate.json",
+    "sha256": "23627db517c165d7758f56395c1ef9cc4d4abf82084605e2741dff993563a348",
+    "bytes": 6490
+  },
+  "artifact": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\dfd-level-1.html",
+    "sha256": "381b1bbf441ee5e8f7b213eddadaca306b8c0b96d204653c1770abfbbf078293",
+    "bytes": 763266
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\dfd-level-1.finalize.json",
+    "summaryReceipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\dfd-level-1.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\dfd-level-1.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.3.1",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.3.1",
+    "severity": "normal",
+    "checkedAt": "2026-11-24T21:58:57.331Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.3.1. A previous check at 2026-11-24T21:58:57.331Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.3.1. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:b92b4d55446966fd74e5338a45d6de9a7a1b194420cd5eb14d2cdc39f1053b80"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2971
+}

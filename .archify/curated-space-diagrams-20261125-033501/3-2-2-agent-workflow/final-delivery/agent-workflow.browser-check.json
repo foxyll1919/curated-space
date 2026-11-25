@@ -1,0 +1,1298 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "browser-check",
+  "evidenceKind": "automated-browser",
+  "status": "pass",
+  "visualReview": "not-requested",
+  "provenance": "current",
+  "deliveryReceiptId": "7fe3541f-e4b3-4854-92ce-2fadea61df93",
+  "artifact": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.html",
+    "sha256": "3507e0810328ab2e915d775de9c3387cd4240795d4b47812755c9404f3bbb236",
+    "bytes": 760610
+  },
+  "state": {
+    "detail": "read",
+    "motion": "still"
+  },
+  "chrome": {
+    "status": "available",
+    "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  },
+  "diagnostics": [],
+  "containment": {
+    "status": "pass",
+    "policy": "fit-or-reader-declared-readable-vertical-scroll",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "theme": "light",
+        "innerWidth": 1440,
+        "innerHeight": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1187,
+        "diagramWidth": 1157,
+        "pageComposition": {
+          "bodyPaddingPx": 12,
+          "headerPx": 52,
+          "diagramChromePx": 78,
+          "svgPx": 746,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 119,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 119,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "theme": "light",
+        "innerWidth": 1600,
+        "innerHeight": 1000,
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1239,
+        "diagramWidth": 1209,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 780,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 124,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 124,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "theme": "light",
+        "innerWidth": 1920,
+        "innerHeight": 1080,
+        "scrollWidth": 1920,
+        "scrollHeight": 1080,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1364,
+        "diagramWidth": 1334,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 860,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 137,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 137,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "theme": "light",
+        "innerWidth": 2048,
+        "innerHeight": 1320,
+        "scrollWidth": 2048,
+        "scrollHeight": 1320,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1728,
+        "diagramWidth": 1678,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 68,
+          "diagramChromePx": 94,
+          "svgPx": 1082,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 173,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 173,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 44,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      }
+    ]
+  },
+  "themeStates": {
+    "status": "pass",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "requestedTheme": "light",
+        "resolvedTheme": "light",
+        "ok": true
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "requestedTheme": "light",
+        "resolvedTheme": "light",
+        "ok": true
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "requestedTheme": "light",
+        "resolvedTheme": "light",
+        "ok": true
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "requestedTheme": "light",
+        "resolvedTheme": "light",
+        "ok": true
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "requestedTheme": "dark",
+        "resolvedTheme": "dark",
+        "ok": true
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "requestedTheme": "dark",
+        "resolvedTheme": "dark",
+        "ok": true
+      }
+    ]
+  },
+  "readability": {
+    "status": "pass",
+    "minimumProjectedNodeTextPx": 6,
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "theme": "light",
+        "innerWidth": 1440,
+        "innerHeight": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1187,
+        "diagramWidth": 1157,
+        "pageComposition": {
+          "bodyPaddingPx": 12,
+          "headerPx": 52,
+          "diagramChromePx": 78,
+          "svgPx": 746,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 119,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 119,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "theme": "light",
+        "innerWidth": 1600,
+        "innerHeight": 1000,
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1239,
+        "diagramWidth": 1209,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 780,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 124,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 124,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "theme": "light",
+        "innerWidth": 1920,
+        "innerHeight": 1080,
+        "scrollWidth": 1920,
+        "scrollHeight": 1080,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1364,
+        "diagramWidth": 1334,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 860,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 137,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 137,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "theme": "light",
+        "innerWidth": 2048,
+        "innerHeight": 1320,
+        "scrollWidth": 2048,
+        "scrollHeight": 1320,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1728,
+        "diagramWidth": 1678,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 68,
+          "diagramChromePx": 94,
+          "svgPx": 1082,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 173,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 173,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 44,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      }
+    ]
+  },
+  "viewerChrome": {
+    "status": "pass",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "theme": "light",
+        "innerWidth": 1440,
+        "innerHeight": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1187,
+        "diagramWidth": 1157,
+        "pageComposition": {
+          "bodyPaddingPx": 12,
+          "headerPx": 52,
+          "diagramChromePx": 78,
+          "svgPx": 746,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 119,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 119,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 119,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 60,
+            "spaceAboveNodesPx": 47,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "theme": "light",
+        "innerWidth": 1600,
+        "innerHeight": 1000,
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1239,
+        "diagramWidth": 1209,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 780,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 124,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 124,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 124,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 62,
+            "spaceAboveNodesPx": 49,
+            "spaceBelowNodesPx": 13
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "theme": "light",
+        "innerWidth": 1920,
+        "innerHeight": 1080,
+        "scrollWidth": 1920,
+        "scrollHeight": 1080,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1364,
+        "diagramWidth": 1334,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 60,
+          "diagramChromePx": 84,
+          "svgPx": 860,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 137,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 137,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 137,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 69,
+            "spaceAboveNodesPx": 54,
+            "spaceBelowNodesPx": 15
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 54,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "theme": "light",
+        "innerWidth": 2048,
+        "innerHeight": 1320,
+        "scrollWidth": 2048,
+        "scrollHeight": 1320,
+        "overflowX": false,
+        "overflowY": false,
+        "verticalScrollAccepted": false,
+        "overflowDisposition": "contained",
+        "readerLayout": "adaptive",
+        "readerOverflow": null,
+        "readerFit": null,
+        "ok": true,
+        "readerWidth": 1728,
+        "diagramWidth": 1678,
+        "pageComposition": {
+          "bodyPaddingPx": 64,
+          "headerPx": 68,
+          "diagramChromePx": 94,
+          "svgPx": 1082,
+          "cardsPx": 0,
+          "viewBoxHeight": 652
+        },
+        "viewBoxWidth": 1011,
+        "workflowLanes": [
+          {
+            "frameId": "lane-0",
+            "heightPx": 173,
+            "nodeCount": 1,
+            "nodeIds": [
+              "question"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-1",
+            "heightPx": 173,
+            "nodeCount": 3,
+            "nodeIds": [
+              "agent_endpoint",
+              "supervisor",
+              "answer"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-2",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "search_tool",
+              "materialize"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          },
+          {
+            "frameId": "lane-3",
+            "heightPx": 173,
+            "nodeCount": 2,
+            "nodeIds": [
+              "not_configured",
+              "no_evidence"
+            ],
+            "nodeSpanPx": 86,
+            "spaceAboveNodesPx": 68,
+            "spaceBelowNodesPx": 18
+          }
+        ],
+        "minimumProjectedNodeTextPx": 7.7,
+        "minimumProjectedNonEdgeTextPx": 7.7,
+        "minimumProjectedEdgeTextPx": 8,
+        "minimumProjectedNodeText": "Question + history",
+        "minimumProjectedNodeTextDetail": "context",
+        "minimumProjectedNodeTextOwner": {
+          "kind": "node",
+          "id": "question"
+        },
+        "minimumRequiredNodeTextPx": 6,
+        "readabilityOk": true,
+        "hasLegend": true,
+        "hasNavigationDock": true,
+        "legendDockIntersectionArea": 0,
+        "dockStageIntersectionArea": 0,
+        "dockStageGap": 10,
+        "requiredDockStageGap": 10,
+        "viewerChromeStageOk": true,
+        "viewerChromeReserve": 44,
+        "viewerChromeActive": true,
+        "viewerChromeOk": true,
+        "resolvedTheme": "light"
+      }
+    ]
+  },
+  "captures": {
+    "status": "not-requested",
+    "screenshots": [],
+    "contactSheet": null
+  },
+  "sidecars": {
+    "directory": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\final-delivery",
+    "receipt": "agent-workflow.browser-check.json",
+    "files": []
+  }
+}

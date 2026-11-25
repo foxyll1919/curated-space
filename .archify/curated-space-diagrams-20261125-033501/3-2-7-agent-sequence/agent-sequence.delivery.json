@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "52aaa0e2-684d-4771-8b93-0e37c8ba3770",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-7-agent-sequence\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-7-agent-sequence\\agent-sequence.html",
+  "specification": {
+    "sha256": "5cc52bc0adf80d5bd66966e76cd475b67fc5833844e4a7d3427cac90e0df488e",
+    "bytes": 5253
+  },
+  "artifact": {
+    "sha256": "7a08c475be2883c5ef1346e4a8f39609b368496de43a80e4ff8a5f8d4832e6c4",
+    "bytes": 763621
+  }
+}

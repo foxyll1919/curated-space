@@ -1,0 +1,158 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "3.2.2 Agent Workflow",
+    "output": ".archify/curated-space-diagrams-20261125-033501/3-2-2-agent-workflow/agent-workflow.html",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "viewBox": [1011, 652],
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "lanes": [
+    { "id": "owner", "label": "Owner / Ask UI" },
+    { "id": "agent", "label": "LangGraph Agent" },
+    { "id": "tools", "label": "Retrieval Tools" },
+    { "id": "exceptions", "label": "Fallbacks", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "Question", "fromCol": 0, "toCol": 1 },
+    { "id": "route", "label": "Route", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "retrieve-answer", "label": "Retrieve + respond", "fromCol": 4, "toCol": 5 }
+  ],
+  "mainPath": ["question", "agent_endpoint", "supervisor", "search_tool", "materialize", "answer"],
+  "nodes": [
+    {
+      "id": "question",
+      "lane": "owner",
+      "col": 0,
+      
+      "type": "frontend",
+      "label": "Ask a Question",
+      "sublabel": "Question + history",
+      "sources": [
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 43 }
+      ]
+    },
+    {
+      "id": "agent_endpoint",
+      "lane": "agent",
+      "col": 1,
+      
+      "type": "backend",
+      "label": "Agent Endpoint",
+      "sublabel": "Agent API",
+      "sources": [
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "lane": "agent",
+      "col": 2,
+      
+      "type": "backend",
+      "label": "Supervisor",
+      "sublabel": "Gemini route",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 61, "end_line": 72 },
+        { "path": "backend/app/services/embeddings.py", "line": 111, "end_line": 129 }
+      ]
+    },
+    {
+      "id": "search_tool",
+      "lane": "tools",
+      "col": 3,
+      
+      "type": "backend",
+      "label": "Search Tool",
+      "sublabel": "Tool call",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 36, "end_line": 58 },
+        { "path": "backend/app/services/agent.py", "line": 74, "end_line": 89 }
+      ]
+    },
+    {
+      "id": "materialize",
+      "lane": "tools",
+      "col": 4,
+      
+      "type": "backend",
+      "label": "Search Results",
+      "sublabel": "Ranked items",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 74, "end_line": 107 },
+        { "path": "backend/app/services/retrieval.py", "line": 22, "end_line": 115 }
+      ]
+    },
+    {
+      "id": "answer",
+      "lane": "agent",
+      "col": 5,
+      
+      "type": "backend",
+      "label": "Answer",
+      "sublabel": "Answer + citations",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 108, "end_line": 137 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 }
+      ]
+    },
+    {
+      "id": "no_evidence",
+      "lane": "exceptions",
+      "col": 5,
+      
+      "type": "security",
+      "label": "No Evidence",
+      "sublabel": "Fixed fallback",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 108, "end_line": 115 }
+      ]
+    },
+    {
+      "id": "not_configured",
+      "lane": "exceptions",
+      "col": 1,
+      
+      "type": "security",
+      "label": "No Provider",
+      "sublabel": "Set Gemini key",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 31, "end_line": 33 }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "question-to-endpoint", "from": "question", "to": "agent_endpoint", "label": "POST question + history", "variant": "emphasis", "role": "main" },
+    { "id": "endpoint-to-supervisor", "from": "agent_endpoint", "to": "supervisor", "label": "run_agent", "variant": "default", "role": "main" },
+    { "id": "supervisor-to-tool", "from": "supervisor", "to": "search_tool", "label": "selected strategy", "variant": "emphasis", "role": "main" },
+    { "id": "tool-to-results", "from": "search_tool", "to": "materialize", "label": "IDs; retrieval runs again", "variant": "default", "role": "main", "route": "straight" },
+    { "id": "results-to-answer", "from": "materialize", "to": "answer", "label": "results found", "variant": "emphasis", "role": "main" },
+    { "id": "results-to-fallback", "from": "materialize", "to": "no_evidence", "label": "no results", "variant": "security", "role": "error", "route": "bottom-channel" },
+    { "id": "endpoint-to-unavailable", "from": "agent_endpoint", "to": "not_configured", "label": "provider not configured", "variant": "security", "role": "error" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Single-Agent Graph",
+      "items": [
+        "The source defines one LangGraph agent with supervisor, retrieval and answer nodes.",
+        "The graph is a one-pass sequence; it has no iterative reasoning or re-planning cycle."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Tool Result Detail",
+      "items": [
+        "The selected LangChain tool returns item IDs, but run_agent discards that return value.",
+        "The retrieval node then runs the selected search again to build ranked SearchResult objects."
+      ]
+    }
+  ]
+}

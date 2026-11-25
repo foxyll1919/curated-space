@@ -1,0 +1,283 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Local Sign-in Origin Check",
+    "output": ".archify/sequence-local-origin-check-20261125-032522/local-origin-check.html",
+    "column_fit": "spread",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "participants": [
+    {
+      "id": "person",
+      "type": "external",
+      "label": "You",
+      "sublabel": "local browser",
+      "sources": [
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "line": 65,
+          "end_line": 96
+        }
+      ]
+    },
+    {
+      "id": "signin",
+      "type": "frontend",
+      "label": "Sign-in UI",
+      "sublabel": "React app",
+      "sources": [
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "line": 65,
+          "end_line": 96
+        },
+        {
+          "path": "frontend/src/lib/auth.ts",
+          "line": 67,
+          "end_line": 73
+        }
+      ]
+    },
+    {
+      "id": "vite",
+      "type": "frontend",
+      "label": "Vite Proxy",
+      "sublabel": "localhost:8000",
+      "sources": [
+        {
+          "path": "frontend/vite.config.ts",
+          "line": 15,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "type": "backend",
+      "label": "Backend Settings",
+      "sublabel": "allowed_origins",
+      "sources": [
+        {
+          "path": "backend/app/core/config.py",
+          "line": 15,
+          "end_line": 18
+        },
+        {
+          "path": "backend/app/core/config.py",
+          "line": 46
+        },
+        {
+          "path": "backend/app/main.py",
+          "line": 143,
+          "end_line": 156
+        }
+      ]
+    },
+    {
+      "id": "guard",
+      "type": "security",
+      "label": "Origin Guard",
+      "sublabel": "request middleware",
+      "sources": [
+        {
+          "path": "backend/app/core/middleware.py",
+          "line": 59,
+          "end_line": 70
+        },
+        {
+          "path": "backend/app/core/middleware.py",
+          "line": 113,
+          "end_line": 123
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "backend",
+      "label": "Auth Route",
+      "sublabel": "POST /auth/login",
+      "sources": [
+        {
+          "path": "backend/app/api/routes/auth.py",
+          "line": 93,
+          "end_line": 105
+        },
+        {
+          "path": "backend/app/api/routes/auth.py",
+          "line": 43,
+          "end_line": 58
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 145,
+      "to": 315,
+      "label": "Rejected request"
+    },
+    {
+      "from": 335,
+      "to": 390,
+      "label": "Update and restart"
+    },
+    {
+      "from": 400,
+      "to": 625,
+      "label": "Retry after reload"
+    }
+  ],
+  "messages": [
+    {
+      "id": "load-origin-config",
+      "from": "settings",
+      "to": "guard",
+      "y": 160,
+      "label": "Provide allowed_origins at startup",
+      "variant": "default"
+    },
+    {
+      "id": "submit-login",
+      "from": "person",
+      "to": "signin",
+      "y": 190,
+      "label": "Submit sign-in form",
+      "variant": "default"
+    },
+    {
+      "id": "post-login",
+      "from": "signin",
+      "to": "vite",
+      "y": 220,
+      "label": "POST /api/v1/auth/login",
+      "variant": "emphasis",
+      "note": "Browser Origin: http://localhost:5173"
+    },
+    {
+      "id": "proxy-login",
+      "from": "vite",
+      "to": "guard",
+      "y": 250,
+      "label": "Proxy /api to localhost:8000",
+      "variant": "default",
+      "note": "Vite proxy uses changeOrigin: true"
+    },
+    {
+      "id": "deny-origin",
+      "from": "guard",
+      "to": "vite",
+      "y": 280,
+      "label": "403 Forbidden",
+      "variant": "security",
+      "note": "When Origin is neither same-host nor in allowed_origins; login route is not reached"
+    },
+    {
+      "id": "return-denial",
+      "from": "vite",
+      "to": "signin",
+      "y": 310,
+      "label": "Return origin error",
+      "variant": "return"
+    },
+    {
+      "id": "set-origin",
+      "from": "person",
+      "to": "settings",
+      "y": 350,
+      "label": "Set exact local origin and restart backend",
+      "variant": "emphasis",
+      "note": "ALLOWED_ORIGINS=[\"http://localhost:5173\"]"
+    },
+    {
+      "id": "reload-settings",
+      "from": "settings",
+      "to": "guard",
+      "y": 380,
+      "label": "Load refreshed allowlist",
+      "variant": "default"
+    },
+    {
+      "id": "retry-login",
+      "from": "person",
+      "to": "signin",
+      "y": 415,
+      "label": "Retry sign-in",
+      "variant": "default"
+    },
+    {
+      "id": "retry-post",
+      "from": "signin",
+      "to": "vite",
+      "y": 445,
+      "label": "POST /api/v1/auth/login",
+      "variant": "emphasis",
+      "note": "Origin: http://localhost:5173"
+    },
+    {
+      "id": "retry-proxy",
+      "from": "vite",
+      "to": "guard",
+      "y": 475,
+      "label": "Proxy request to backend",
+      "variant": "default"
+    },
+    {
+      "id": "allow-origin",
+      "from": "guard",
+      "to": "auth",
+      "y": 505,
+      "label": "Forward: origin is allowlisted",
+      "variant": "security"
+    },
+    {
+      "id": "session-cookie",
+      "from": "auth",
+      "to": "vite",
+      "y": 535,
+      "label": "200 + HttpOnly session cookie",
+      "variant": "return"
+    },
+    {
+      "id": "return-login",
+      "from": "vite",
+      "to": "signin",
+      "y": 565,
+      "label": "Return login response",
+      "variant": "return"
+    },
+    {
+      "id": "signed-in",
+      "from": "signin",
+      "to": "person",
+      "y": 595,
+      "label": "Sign-in completes",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why the 403 Happens",
+      "items": [
+        "The origin guard checks POST requests before the login route.",
+        "The browser origin must match the request host or an explicit allowed origin."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Local Fix",
+      "items": [
+        "Use ALLOWED_ORIGINS=[\"http://localhost:5173\"] in backend/.env.",
+        "Restart the backend so the running process reloads settings.",
+        "Use the origin only; do not add /login or a trailing slash."
+      ]
+    }
+  ]
+}

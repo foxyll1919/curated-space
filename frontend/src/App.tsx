@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useAuth as useClerkAuth } from '@clerk/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppShell } from '@/components/AppShell'
@@ -9,9 +11,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { AskPage } from '@/pages/AskPage'
-import { AuthProvider } from '@/hooks/useAuth'
-import { useAuth } from '@/lib/auth-context'
-import { isApiError } from '@/lib/api'
+import { isApiError, setAuthTokenGetter } from '@/lib/api'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,17 +27,28 @@ const queryClient = new QueryClient({
 })
 
 /**
+ * Keeps the API layer in sync with the current Clerk session JWT
+ * so every background request sends Authorization: Bearer <token>.
+ */
+function AuthSync() {
+  const { getToken } = useClerkAuth()
+  useEffect(() => {
+    setAuthTokenGetter(getToken)
+  }, [getToken])
+  return null
+}
+
+/**
  * Gate for the signed-in part of the app.
  *
- * While the "who am I" request is in flight nothing is rendered, so the library
- * never flashes before the cookie turns out to be expired. The attempted path
- * travels along in router state and the sign-in page returns to it afterwards.
+ * While Clerk's session is still loading, renders a minimal checking state.
+ * Once loaded, redirects unauthenticated visitors to /login.
  */
 function RequireAccount() {
-  const { isLoading, account } = useAuth()
+  const { isLoaded, isSignedIn } = useClerkAuth()
   const location = useLocation()
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <span className="text-sm text-muted-foreground">Checking your session…</span>
@@ -45,7 +56,7 @@ function RequireAccount() {
     )
   }
 
-  if (account === null) {
+  if (!isSignedIn) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
 
@@ -58,8 +69,8 @@ function RequireAccount() {
 
 /** Keeps a signed-in reader away from the sign-in page. */
 function RedirectIfSignedIn() {
-  const { isLoading, account } = useAuth()
-  if (!isLoading && account) return <Navigate to="/" replace />
+  const { isLoaded, isSignedIn } = useClerkAuth()
+  if (isLoaded && isSignedIn) return <Navigate to="/" replace />
   return <LoginPage />
 }
 
@@ -87,12 +98,11 @@ const router = createBrowserRouter([
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <RouterProvider router={router} />
-          <Toaster position="bottom-right" />
-        </TooltipProvider>
-      </AuthProvider>
+      <AuthSync />
+      <TooltipProvider>
+        <RouterProvider router={router} />
+        <Toaster position="bottom-right" />
+      </TooltipProvider>
     </QueryClientProvider>
   )
 }

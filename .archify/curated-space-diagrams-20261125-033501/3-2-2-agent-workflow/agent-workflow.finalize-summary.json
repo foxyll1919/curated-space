@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\candidate.json",
+    "sha256": "fb0482de1326fd2e11003cfac1a3fb81f660639f09922b08eaf38523e93081a0",
+    "bytes": 5671
+  },
+  "artifact": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.html",
+    "sha256": "3507e0810328ab2e915d775de9c3387cd4240795d4b47812755c9404f3bbb236",
+    "bytes": 760610
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "fail"
+  },
+  "failedStage": "browser-check",
+  "diagnostics": [
+    {
+      "code": "viewer/evidence-path-conflict",
+      "severity": "error",
+      "message": "browser-check will not replace the existing unowned evidence path \"C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.browser-check.json\".",
+      "subject": {
+        "artifact": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.html",
+        "evidencePath": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.browser-check.json"
+      },
+      "evidence": {
+        "reason": {
+          "code": "ownership-artifact-mismatch"
+        }
+      },
+      "supportedFixes": [
+        "move the conflicting file aside, or choose a separate --out-dir, then rerun browser-check"
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 1,
+    "shown": 1,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.finalize.json",
+    "summaryReceipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.3.1",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.3.1",
+    "severity": "normal",
+    "checkedAt": "2026-11-24T21:58:57.331Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.3.1. A previous check at 2026-11-24T21:58:57.331Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.3.1. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:b92b4d55446966fd74e5338a45d6de9a7a1b194420cd5eb14d2cdc39f1053b80"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2144
+}

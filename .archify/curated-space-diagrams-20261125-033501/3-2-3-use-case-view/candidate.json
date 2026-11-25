@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "3.2.3 Use-Case View",
+    "output": ".archify/curated-space-diagrams-20261125-033501/3-2-3-use-case-view/use-case-view.html",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "components": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Library Owner",
+      "sublabel": "signed-in user",
+      "pos": [40, 300],
+      "size": [140, 70],
+      "sources": [
+        { "path": "frontend/src/App.tsx", "line": 18, "end_line": 75 }
+      ]
+    },
+    {
+      "id": "web_app",
+      "type": "frontend",
+      "label": "Curated Space Web App",
+      "sublabel": "React interface",
+      "pos": [300, 300],
+      "size": [190, 76],
+      "sources": [
+        { "path": "frontend/src/App.tsx", "line": 18, "end_line": 75 },
+        { "path": "frontend/src/components/AppShell.tsx", "line": 1, "end_line": 35 }
+      ]
+    },
+    {
+      "id": "account",
+      "type": "security",
+      "label": "Account & Sessions",
+      "sublabel": "register, sign in, sign out",
+      "tag": "Use case",
+      "pos": [570, 100],
+      "size": [210, 78],
+      "sources": [
+        { "path": "backend/app/api/routes/auth.py", "line": 65, "end_line": 131 },
+        { "path": "frontend/src/pages/LoginPage.tsx", "line": 65, "end_line": 96 }
+      ]
+    },
+    {
+      "id": "library",
+      "type": "backend",
+      "label": "Manage Screenshots",
+      "sublabel": "upload, browse, edit, delete, reanalyze",
+      "tag": "Use case",
+      "pos": [820, 220],
+      "size": [240, 78],
+      "sources": [
+        { "path": "backend/app/api/routes/items.py", "line": 46, "end_line": 92 },
+        { "path": "backend/app/api/routes/items.py", "line": 155, "end_line": 230 }
+      ]
+    },
+    {
+      "id": "ask_search",
+      "type": "backend",
+      "label": "Search & Ask",
+      "sublabel": "keyword, semantic, hybrid, cited answers",
+      "tag": "Use case",
+      "pos": [820, 360],
+      "size": [240, 78],
+      "sources": [
+        { "path": "backend/app/api/routes/intelligence.py", "line": 63, "end_line": 173 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 },
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 43 }
+      ]
+    },
+    {
+      "id": "usage",
+      "type": "backend",
+      "label": "Review Usage",
+      "sublabel": "token, call and cost summaries",
+      "tag": "Use case",
+      "pos": [300, 500],
+      "size": [210, 78],
+      "sources": [
+        { "path": "backend/app/api/routes/usage.py", "line": 1, "end_line": 25 },
+        { "path": "frontend/src/pages/SettingsPage.tsx", "line": 1, "end_line": 80 }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Curated Space",
+      "wraps": ["web_app", "account", "library", "ask_search", "usage"]
+    }
+  ],
+  "connections": [
+    { "id": "owner-web", "from": "owner", "to": "web_app", "label": "uses private library", "variant": "emphasis" },
+    { "id": "web-account", "from": "web_app", "to": "account", "label": "register / sign in / out", "variant": "security" },
+    { "id": "web-library", "from": "web_app", "to": "library", "label": "curate screenshots" },
+    { "id": "web-ask", "from": "web_app", "to": "ask_search", "label": "search / ask", "variant": "emphasis" },
+    { "id": "web-usage", "from": "web_app", "to": "usage", "label": "review usage" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Owner Goals",
+      "items": [
+        "Create or access an account, then use an owner-scoped screenshot library.",
+        "Save and manage screenshots, search saved items, and ask questions with citations.",
+        "Inspect usage summaries from settings."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Notation",
+      "items": [
+        "Archify has no native UML use-case primitive; capability blocks are used for the user goals."
+      ]
+    }
+  ]
+}

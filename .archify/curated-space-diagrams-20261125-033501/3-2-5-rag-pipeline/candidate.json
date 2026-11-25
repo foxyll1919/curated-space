@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "3.2.5 RAG Pipeline — Screenshot Library",
+    "output": ".archify/curated-space-diagrams-20261125-033501/3-2-5-rag-pipeline/rag-pipeline.html",
+    "viewBox": [1080, 690],
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "stages": [
+    { "label": "Ingestion / Question" },
+    { "label": "API / Supervisor" },
+    { "label": "Extract / Search" },
+    { "label": "Text / Query Embedding" },
+    { "label": "Index / Grounded Response" }
+  ],
+  "nodes": [
+    {
+      "id": "uploaded_image",
+      "type": "external",
+      "label": "Screenshot",
+      "sublabel": "owner upload",
+      "stage": 0,
+      "row": 0,
+      "width": 140,
+      "sources": [
+        { "path": "backend/app/api/routes/items.py", "line": 46, "end_line": 74 }
+      ]
+    },
+    {
+      "id": "question",
+      "type": "external",
+      "label": "Owner Question",
+      "sublabel": "Ask screen",
+      "stage": 0,
+      "row": 2,
+      "width": 150,
+      "sources": [
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 43 }
+      ]
+    },
+    {
+      "id": "upload_api",
+      "type": "backend",
+      "label": "Upload Firewall",
+      "sublabel": "sanitize before analysis",
+      "stage": 1,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/api/routes/items.py", "line": 57, "end_line": 92 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "type": "backend",
+      "label": "LangGraph Supervisor",
+      "sublabel": "Gemini route strategy",
+      "stage": 1,
+      "row": 2,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 61, "end_line": 72 },
+        { "path": "backend/app/services/embeddings.py", "line": 111, "end_line": 129 }
+      ]
+    },
+    {
+      "id": "extractor",
+      "type": "cloud",
+      "label": "Gemini Extractor",
+      "sublabel": "structured metadata",
+      "stage": 2,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/extraction/gemini.py", "line": 55, "end_line": 105 }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "type": "backend",
+      "label": "Search Tools",
+      "sublabel": "keyword / semantic / hybrid",
+      "stage": 2,
+      "row": 2,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 36, "end_line": 107 },
+        { "path": "backend/app/services/retrieval.py", "line": 22, "end_line": 115 }
+      ]
+    },
+    {
+      "id": "metadata_text",
+      "type": "backend",
+      "label": "Joined Metadata Text",
+      "sublabel": "one joined text; no chunks",
+      "stage": 3,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/embeddings.py", "line": 131, "end_line": 139 },
+        { "path": "backend/app/services/pipeline.py", "line": 240, "end_line": 265 }
+      ]
+    },
+    {
+      "id": "query_embedder",
+      "type": "cloud",
+      "label": "Gemini Query Embedding",
+      "sublabel": "semantic / hybrid only",
+      "stage": 3,
+      "row": 3,
+      "width": 160,
+      "sources": [
+        { "path": "backend/app/services/embeddings.py", "line": 70, "end_line": 89 },
+        { "path": "backend/app/core/config.py", "line": 71, "end_line": 75 }
+      ]
+    },
+    {
+      "id": "item_embedder",
+      "type": "cloud",
+      "label": "Gemini Item Embedder",
+      "sublabel": "one vector per screenshot",
+      "stage": 4,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/embeddings.py", "line": 70, "end_line": 89 },
+        { "path": "backend/app/core/config.py", "line": 71, "end_line": 75 }
+      ]
+    },
+    {
+      "id": "index",
+      "type": "database",
+      "label": "SQLite Search Index",
+      "sublabel": "items + embeddings + FTS5",
+      "stage": 4,
+      "row": 1,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/db/models.py", "line": 18, "end_line": 68 },
+        { "path": "backend/app/db/models.py", "line": 122, "end_line": 140 },
+        { "path": "backend/app/services/retrieval.py", "line": 22, "end_line": 115 }
+      ]
+    },
+    {
+      "id": "context",
+      "type": "backend",
+      "label": "Build Context",
+      "sublabel": "titles, descriptions, tags",
+      "stage": 4,
+      "row": 2,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 108, "end_line": 137 }
+      ]
+    },
+    {
+      "id": "answer_model",
+      "type": "cloud",
+      "label": "Gemini Answer Model",
+      "sublabel": "grounded answer + IDs",
+      "stage": 4,
+      "row": 3,
+      "width": 150,
+      "sources": [
+        { "path": "backend/app/services/embeddings.py", "line": 91, "end_line": 109 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 218, "end_line": 238 },
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 43 }
+      ]
+    }
+  ],
+  "flows": [
+    { "id": "image-in", "from": "uploaded_image", "to": "upload_api", "label": "Image bytes", "variant": "emphasis" },
+    { "id": "extract-image", "from": "upload_api", "to": "extractor", "label": "Sanitized PNG", "labelAt": [423, 201], "variant": "security", "classification": "image input" },
+    { "id": "extract-metadata", "from": "extractor", "to": "metadata_text", "label": "Metadata fields", "labelAt": [638, 201], "variant": "emphasis" },
+    { "id": "text-to-embed", "from": "metadata_text", "to": "item_embedder", "label": "Joined text", "labelAt": [850, 201], "variant": "default" },
+    { "id": "write-index", "from": "item_embedder", "to": "index", "label": "One item vector", "labelAt": [960, 201], "variant": "emphasis" },
+    { "id": "ask-question", "from": "question", "to": "supervisor", "label": "Question + history", "labelAt": [208, 429], "variant": "emphasis" },
+    { "id": "select-tool", "from": "supervisor", "to": "retrieval", "label": "Selected strategy", "labelAt": [423, 429], "variant": "default" },
+    { "id": "query-embedding", "from": "retrieval", "to": "query_embedder", "label": "Conditional query embed", "labelAt": [638, 435], "variant": "default", "route": "straight" },
+    { "id": "query-vector", "from": "query_embedder", "to": "index", "label": "Query vector", "labelAt": [850, 378], "variant": "default" },
+    { "id": "search-index", "from": "retrieval", "to": "index", "label": "Owner-scoped FTS5 / vector search", "labelAt": [745, 321], "variant": "security", "classification": "ready items only" },
+    { "id": "ranked-candidates", "from": "index", "to": "context", "label": "Ranked matches; hybrid RRF", "labelAt": [960, 321], "variant": "emphasis" },
+    { "id": "grounding-context", "from": "context", "to": "answer_model", "label": "Question + retrieved metadata", "labelAt": [960, 435], "variant": "security" }
+  ],
+  "cards": [
+    {
+      "dot": "slate",
+      "title": "Chunking Is Not Implemented",
+      "items": [
+        "Title, description and tags are joined into one text per screenshot.",
+        "There is no document splitter or multiple chunks per screenshot; each item has one embedding record."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Evidence-Bounded Answer",
+      "items": [
+        "Retrieval is restricted to the signed-in owner's ready items.",
+        "When there are no matches, the agent returns an insufficient-evidence message without calling the answer model."
+      ]
+    }
+  ]
+}

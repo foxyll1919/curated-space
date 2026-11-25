@@ -165,6 +165,7 @@ Settings can be supplied as environment variables or in `backend/.env`. Environm
 |---|---:|---|
 | `API_KEY` | unset | Optional shared key for item and usage routes; the browser uses a session cookie instead |
 | `API_KEY_OWNER_ID` | `legacy-owner` | Stable owner ID associated with the single configured key; keep it stable after migration |
+| `CLERK_JWT_KEY` | unset | Clerk instance PEM public key; enables verification of Clerk session bearer tokens |
 | `AUTH_ALLOW_REGISTRATION` | `false` | Allow account creation beyond the first one |
 | `AUTH_SESSION_TTL_DAYS` | 30 | Session cookie lifetime |
 | `AUTH_COOKIE_NAME` | `cs_session` | Session cookie name |
@@ -202,6 +203,14 @@ Settings can be supplied as environment variables or in `backend/.env`. Environm
 | `GEMINI_RETURN_LABELS` | `false` | Benchmark-only Gemini taxonomy output; off by default |
 
 `ALLOWED_ORIGINS` is a JSON array, for example `["http://localhost:5173"]`. It enables credentialed cross-origin browser access for the listed app origin. Upload and reanalyze limits are in-process, so multiple API workers do not share counts.
+
+The backend's Clerk migration groundwork is opt-in: set `CLERK_JWT_KEY` and
+`ALLOWED_ORIGINS` to validate Clerk session tokens. `POST /api/v1/auth/link-clerk`
+requires both an existing local session cookie and a verified Clerk bearer token;
+it preserves the local user ID so existing `items.owner_id` values do not change.
+Local password login and sessions remain available during migration. The backend
+does not export users or password hashes to Clerk. The frontend still uses local
+authentication until a separate frontend integration is made.
 
 ## Cost and provider data handling
 

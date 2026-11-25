@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "8b26f2ba-0889-40ff-a5bf-58e5a1a7655a",
+  "status": "current",
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-4-dfd-level-1\\dfd-level-1.html",
+  "specification": {
+    "sha256": "23627db517c165d7758f56395c1ef9cc4d4abf82084605e2741dff993563a348",
+    "bytes": 6490
+  },
+  "artifact": {
+    "sha256": "381b1bbf441ee5e8f7b213eddadaca306b8c0b96d204653c1770abfbbf078293",
+    "bytes": 763266
+  }
+}

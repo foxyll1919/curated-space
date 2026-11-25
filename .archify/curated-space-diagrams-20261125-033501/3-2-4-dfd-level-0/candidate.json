@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "3.2.4 Data Flow Diagram — Level 0 (Context)",
+    "output": ".archify/curated-space-diagrams-20261125-033501/3-2-4-dfd-level-0/dfd-level-0.html",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "eb07f33209804759e8821c0facfe2404fac49b6c"
+    }
+  },
+  "stages": [
+    { "label": "External User" },
+    { "label": "System Boundary" },
+    { "label": "External AI Provider" }
+  ],
+  "nodes": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Library Owner",
+      "sublabel": "browser user",
+      "stage": 0,
+      "row": 0,
+      "sources": [
+        { "path": "frontend/src/pages/LoginPage.tsx", "line": 65, "end_line": 96 },
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 43 }
+      ]
+    },
+    {
+      "id": "system",
+      "type": "backend",
+      "label": "Curated Space",
+      "sublabel": "web app + FastAPI backend",
+      "stage": 1,
+      "row": 0,
+      "sources": [
+        { "path": "readme.md", "line": 1, "end_line": 9 },
+        { "path": "backend/app/api/routes/items.py", "line": 46, "end_line": 92 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 129, "end_line": 173 }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "cloud",
+      "label": "Google Gemini",
+      "sublabel": "extract, embed, route, answer",
+      "stage": 2,
+      "row": 0,
+      "width": 160,
+      "sources": [
+        { "path": "backend/app/services/extraction/gemini.py", "line": 55, "end_line": 105 },
+        { "path": "backend/app/services/embeddings.py", "line": 51, "end_line": 129 }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "owner-input",
+      "from": "owner",
+      "to": "system",
+      "label": "Credentials, screenshots, questions, corrections",
+      "variant": "emphasis",
+      "classification": "user input",
+      "labelAt": [208, 201]
+    },
+    {
+      "id": "owner-output",
+      "from": "system",
+      "to": "owner",
+      "label": "Session, library results, upload status, cited answers, usage",
+      "variant": "default",
+      "classification": "owner-scoped output",
+      "labelAt": [208, 234]
+    },
+    {
+      "id": "ai-input",
+      "from": "system",
+      "to": "gemini",
+      "label": "Sanitized image or task text / retrieved context",
+      "variant": "security",
+      "classification": "provider input",
+      "labelAt": [422, 267]
+    },
+    {
+      "id": "ai-output",
+      "from": "gemini",
+      "to": "system",
+      "label": "Metadata, vectors, route choice, answer text",
+      "variant": "emphasis",
+      "classification": "provider response",
+      "labelAt": [422, 300]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Context Boundary",
+      "items": [
+        "This Level 0 view treats Curated Space as one process; internal databases and storage are expanded in Level 1."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Provider Use",
+      "items": [
+        "The backend sends sanitized screenshots for metadata extraction and text for embeddings or grounded answers."
+      ]
+    }
+  ]
+}

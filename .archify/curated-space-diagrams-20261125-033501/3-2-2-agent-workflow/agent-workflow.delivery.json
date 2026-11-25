@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "7fe3541f-e4b3-4854-92ce-2fadea61df93",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\curated-space-diagrams-20261125-033501\\3-2-2-agent-workflow\\agent-workflow.html",
+  "specification": {
+    "sha256": "fb0482de1326fd2e11003cfac1a3fb81f660639f09922b08eaf38523e93081a0",
+    "bytes": 5671
+  },
+  "artifact": {
+    "sha256": "3507e0810328ab2e915d775de9c3387cd4240795d4b47812755c9404f3bbb236",
+    "bytes": 760610
+  }
+}
