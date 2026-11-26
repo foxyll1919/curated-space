@@ -64,29 +64,6 @@ def find_user(session: Session, email: str) -> User | None:
     return session.scalar(select(User).where(User.email == normalize_email(email)))
 
 
-def user_for_clerk_id(session: Session, clerk_user_id: str) -> User | None:
-    return session.scalar(select(User).where(User.clerk_user_id == clerk_user_id))
-
-
-def link_clerk_user(session: Session, user: User, clerk_user_id: str) -> User:
-    """Link an already authenticated local account to a verified Clerk identity."""
-    existing = user_for_clerk_id(session, clerk_user_id)
-    if existing is not None and existing.id != user.id:
-        raise ConflictError("This identity cannot be linked to the account.")
-    if user.clerk_user_id is not None and user.clerk_user_id != clerk_user_id:
-        raise ConflictError("This account is already linked to another identity.")
-    if user.clerk_user_id == clerk_user_id:
-        return user
-
-    user.clerk_user_id = clerk_user_id
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise ConflictError("This identity cannot be linked to the account.") from None
-    return user
-
-
 def create_user(
     session: Session, settings: Settings, *, email: str, password: str
 ) -> tuple[User, bool]:

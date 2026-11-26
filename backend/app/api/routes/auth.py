@@ -12,11 +12,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import delete
 
 from app.api.deps import SessionDep, UserDep, get_settings_dep
-from app.api.deps import clerk_subject_from_request
 from app.core.config import Settings
-from app.core.errors import AuthenticationError
 from app.db.models import Session as SessionRow
-from app.services.auth import link_clerk_user, user_for_token
 from app.schemas.auth import (
     AuthStatusResponse,
     LoginRequest,
@@ -113,24 +110,6 @@ def me(user: UserDep, response: Response) -> UserResponse:
     """The signed-in account, or 401. The client calls this to decide where to route."""
     response.headers["Cache-Control"] = "no-store"
     return UserResponse.from_model(user)
-
-
-@router.post("/link-clerk", response_model=UserResponse)
-def link_clerk(
-    request: Request,
-    response: Response,
-    session: SessionDep,
-    settings: SettingsDep,
-) -> UserResponse:
-    """Link Clerk only when the caller proves both existing local and Clerk sessions."""
-    user = user_for_token(session, request.cookies.get(settings.auth_cookie_name))
-    if user is None:
-        raise AuthenticationError()
-
-    clerk_user_id = clerk_subject_from_request(request, settings)
-    linked_user = link_clerk_user(session, user, clerk_user_id)
-    response.headers["Cache-Control"] = "no-store"
-    return UserResponse.from_model(linked_user)
 
 
 @router.post("/logout", status_code=204)

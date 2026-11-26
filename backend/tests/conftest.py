@@ -34,6 +34,7 @@ def make_settings(tmp_path: Path, **overrides: object) -> Settings:
         storage_path=tmp_path / "uploads",
         gemini_api_key=None,
         api_key="test-api-key",
+        auth_allow_registration=False,
         # PBKDF2 at 600k iterations would dominate the suite's runtime; the
         # cost of a slow hash is a security property these tests do not check.
         password_hash_iterations=1_000,

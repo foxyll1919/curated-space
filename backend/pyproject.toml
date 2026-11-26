@@ -5,7 +5,6 @@ description = "Backend API for the Curated Space screenshot library"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.13,<2",
-    "clerk-backend-api>=3.3.1,<4",
     "curated-ml",
     "fastapi>=0.115,<1",
     "google-genai>=1.0,<3",

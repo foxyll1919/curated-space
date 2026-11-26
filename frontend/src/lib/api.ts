@@ -101,39 +101,11 @@ export type ItemQuery = {
   cursor?: string
 }
 
-let authTokenGetter: (() => Promise<string | null>) | null = null
-
-export function setAuthTokenGetter(getter: () => Promise<string | null>) {
-  authTokenGetter = getter
-}
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
-  const headers = new Headers(init?.headers)
-  if (!headers.has('Authorization')) {
-    let token: string | null = null
-    if (authTokenGetter) {
-      try {
-        token = await authTokenGetter()
-      } catch {
-        // fallback
-      }
-    }
-    if (!token && typeof window !== 'undefined' && (window as unknown as { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk?.session) {
-      try {
-        token = await (window as unknown as { Clerk: { session: { getToken: () => Promise<string | null> } } }).Clerk.session.getToken()
-      } catch {
-        // fallback
-      }
-    }
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
-  }
-
   try {
     // Same-origin by default, so the session cookie rides along on its own.
-    response = await fetch(`${BASE}${path}`, { credentials: 'same-origin', ...init, headers })
+    response = await fetch(`${BASE}${path}`, { credentials: 'same-origin', ...init })
   } catch (cause) {
     throw toTransportError(cause)
   }

@@ -1,8 +1,7 @@
-﻿import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { ServerStrip } from '@/components/ServerStrip'
 import { AccountMenu } from '@/components/AccountMenu'
 import { cn } from 'cn'
 
@@ -75,7 +74,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
-            <ServerStrip />
             <ThemeToggle />
             <AccountMenu />
           </div>

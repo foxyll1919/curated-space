@@ -147,7 +147,7 @@ def create_app(
         # list must be allowed to send it. Wildcards are rejected by settings.
         allow_credentials=bool(app_settings.allowed_origins),
         allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-API-Key", "X-Request-ID"],
+        allow_headers=["Content-Type", "X-API-Key", "X-Request-ID"],
     )
     app.add_middleware(
         RequestSecurityMiddleware,

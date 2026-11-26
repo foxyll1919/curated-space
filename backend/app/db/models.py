@@ -72,16 +72,12 @@ class Item(Base):
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (
-        Index("ix_users_email", "email", unique=True),
-        Index("ix_users_clerk_user_id", "clerk_user_id", unique=True),
-    )
+    __table_args__ = (Index("ix_users_email", "email", unique=True),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     # Stored lowercased and trimmed; the unique index is the case-insensitive guard.
     email: Mapped[str] = mapped_column(String(254), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
-    clerk_user_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
