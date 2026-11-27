@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-from langchain_core.tools import tool
 from langgraph.graph import END, START, StateGraph
 from sqlalchemy.orm import Session
 
@@ -32,30 +31,11 @@ def run_agent(
     if not provider.is_configured:
         return "Semantic retrieval and answer generation are not configured.", [], []
 
-    @tool
-    def keyword_search_tool(query: str) -> list[str]:
-        """Search screenshot metadata with exact and AND-matched FTS5 keywords."""
-        found = keyword_search(session, owner_id=owner_id, query=query, limit=8)
-        return [result.item.id for result in found]
-
-    @tool
-    def semantic_search_tool(query: str) -> list[str]:
-        """Search screenshot meaning with vector similarity embeddings."""
-        vector = provider.embed_text(query)
-        found = semantic_search(session, owner_id=owner_id, query_vector=vector, limit=8)
-        return [result.item.id for result in found]
-
-    @tool
-    def hybrid_search_tool(query: str) -> list[str]:
-        """Combine keyword and semantic screenshot search and rank unique results."""
-        keyword = keyword_search(session, owner_id=owner_id, query=query, limit=8)
-        vector = provider.embed_text(query)
-        semantic = semantic_search(session, owner_id=owner_id, query_vector=vector, limit=8)
-        found = hybrid_search(keyword, semantic, 8)
-        return [result.item.id for result in found]
-
     def supervisor(state: AgentState) -> AgentState:
-        route = provider.route(state["question"])
+        try:
+            route = provider.route(state["question"])
+        except Exception:
+            route = "hybrid"
         return {
             **state,
             "route": route,
@@ -64,14 +44,6 @@ def run_agent(
 
     def retrieval(state: AgentState) -> AgentState:
         route = state["route"]
-        if route == "keyword":
-            tool = keyword_search_tool
-        elif route == "semantic":
-            tool = semantic_search_tool
-        else:
-            tool = hybrid_search_tool
-        tool.invoke({"query": state["question"]})
-
         if route == "keyword":
             found = keyword_search(session, owner_id=owner_id, query=state["question"], limit=8)
         else:

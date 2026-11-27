@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -12,6 +13,8 @@ from app.db.models import Item, ItemEmbedding
 from app.services.embeddings import EmbeddingProvider, embedding_text, text_hash
 from app.services.retrieval import hybrid_search, keyword_search, semantic_search
 from app.services.agent import run_agent
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/intelligence", tags=["intelligence"])
@@ -33,9 +36,14 @@ class SearchResponse(BaseModel):
     mode: str
 
 
+class HistoryMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=2000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
-    history: list[dict[str, str]] = Field(default_factory=list, max_length=12)
+    history: list[HistoryMessage] = Field(default_factory=list, max_length=12)
 
 
 class AskResponse(BaseModel):
@@ -70,13 +78,11 @@ def _source(result) -> Source:
     )
 
 
-def _history_text(history: list[dict[str, str]]) -> str:
+def _history_text(history: list[HistoryMessage]) -> str:
     lines = []
     for message in history:
-        role = message.get("role", "user")
-        content = message.get("content", "")
-        if content:
-            lines.append(f"{role}: {content}")
+        if message.content:
+            lines.append(f"{message.role}: {message.content}")
     return "\n".join(lines)
 
 
@@ -141,36 +147,44 @@ def ask(
             insufficient_evidence=True,
         )
 
-    keyword = keyword_search(session, owner_id=owner_id, query=body.question, limit=8)
-    query_vector = provider.embed_text(body.question)
-    semantic = semantic_search(
-        session,
-        owner_id=owner_id,
-        query_vector=query_vector,
-        limit=8,
-    )
-    results = hybrid_search(keyword, semantic, 8)
-    if not results:
+    try:
+        keyword = keyword_search(session, owner_id=owner_id, query=body.question, limit=8)
+        query_vector = provider.embed_text(body.question)
+        semantic = semantic_search(
+            session,
+            owner_id=owner_id,
+            query_vector=query_vector,
+            limit=8,
+        )
+        results = hybrid_search(keyword, semantic, 8)
+        if not results:
+            return AskResponse(
+                answer="I could not find enough information in your screenshot library.",
+                sources=[],
+                insufficient_evidence=True,
+            )
+
+        context_lines = []
+        for index, result in enumerate(results, start=1):
+            item = result.item
+            context_lines.append(
+                f"[screenshot {item.id}] Title: {item.title or ''}\n"
+                f"Description: {item.description or ''}\n"
+                f"Tags: {', '.join(item.tags)}"
+            )
+        answer = provider.answer(body.question, "\n\n".join(context_lines), history)
         return AskResponse(
-            answer="I could not find enough information in your screenshot library.",
+            answer=answer,
+            sources=[_source(result) for result in results],
+            insufficient_evidence=False,
+        )
+    except Exception:
+        logger.exception("Ask question processing failed")
+        return AskResponse(
+            answer="I could not reach the answer service just now. Please try again.",
             sources=[],
             insufficient_evidence=True,
         )
-
-    context_lines = []
-    for index, result in enumerate(results, start=1):
-        item = result.item
-        context_lines.append(
-            f"[screenshot {item.id}] Title: {item.title or ''}\n"
-            f"Description: {item.description or ''}\n"
-            f"Tags: {', '.join(item.tags)}"
-        )
-    answer = provider.answer(body.question, "\n\n".join(context_lines), history)
-    return AskResponse(
-        answer=answer,
-        sources=[_source(result) for result in results],
-        insufficient_evidence=False,
-    )
 
 
 @router.post("/reindex", response_model=ReindexResponse)
@@ -223,16 +237,25 @@ def agent(
     provider: Annotated[EmbeddingProvider, Depends(get_embedding_provider)],
 ) -> AgentResponse:
     history = _history_text(body.history)
-    answer, results, tool_trace = run_agent(
-        session=session,
-        owner_id=owner_id,
-        provider=provider,
-        question=body.question,
-        history=history,
-    )
-    return AgentResponse(
-        answer=answer,
-        sources=[_source(result) for result in results],
-        tool_trace=tool_trace,
-        insufficient_evidence=not results,
-    )
+    try:
+        answer, results, tool_trace = run_agent(
+            session=session,
+            owner_id=owner_id,
+            provider=provider,
+            question=body.question,
+            history=history,
+        )
+        return AgentResponse(
+            answer=answer,
+            sources=[_source(result) for result in results],
+            tool_trace=tool_trace,
+            insufficient_evidence=not results,
+        )
+    except Exception:
+        logger.exception("Agent question processing failed")
+        return AgentResponse(
+            answer="I could not reach the answer service just now. Please try again.",
+            sources=[],
+            tool_trace=[],
+            insufficient_evidence=True,
+        )

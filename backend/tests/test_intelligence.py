@@ -171,3 +171,93 @@ def test_langgraph_agent_uses_tool_and_returns_source(client):
     body = response.json()
     assert body["tool_trace"] == ["hybrid_search"]
     assert body["sources"][0]["id"] == "screenshot-one"
+
+
+def test_keyword_search_natural_language_fallback(client):
+    _add_item(
+        client.app.state.session_factory,
+        item_id="invoice-screenshot",
+        owner_id="legacy-owner",
+        title="Monthly billing invoice",
+        vector=[0.0, 1.0],
+    )
+
+    response = client.get(
+        "/api/v1/intelligence/search",
+        params={"q": "show me the screenshot about invoice", "mode": "keyword"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert [source["id"] for source in body["items"]] == ["invoice-screenshot"]
+
+
+def test_gemini_failure_returns_200_with_insufficient_evidence(client):
+    class CrashingProvider:
+        model = "crashing-model"
+        is_configured = True
+
+        def embed_text(self, text: str) -> list[float]:
+            raise RuntimeError("Gemini embed failure")
+
+        def answer(self, question: str, context: str, history: str = "") -> str:
+            raise RuntimeError("Gemini answer failure")
+
+        def route(self, question: str) -> str:
+            raise RuntimeError("Gemini route failure")
+
+    client.app.state.embedding_provider = CrashingProvider()
+
+    # Test /ask
+    ask_resp = client.post(
+        "/api/v1/intelligence/ask",
+        json={"question": "anything"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert ask_resp.status_code == 200
+    ask_body = ask_resp.json()
+    assert ask_body["insufficient_evidence"] is True
+    assert "could not reach the answer service" in ask_body["answer"]
+
+    # Test /agent
+    agent_resp = client.post(
+        "/api/v1/intelligence/agent",
+        json={"question": "anything"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert agent_resp.status_code == 200
+    agent_body = agent_resp.json()
+    assert agent_body["insufficient_evidence"] is True
+    assert "could not reach the answer service" in agent_body["answer"]
+
+
+def test_agent_embed_called_once_for_semantic_route(client):
+    class CountingProvider(FakeEmbeddingProvider):
+        def __init__(self) -> None:
+            super().__init__()
+            self.embed_call_count = 0
+
+        def route(self, question: str) -> str:
+            return "semantic"
+
+        def embed_text(self, text: str) -> list[float]:
+            self.embed_call_count += 1
+            return super().embed_text(text)
+
+    provider = CountingProvider()
+    client.app.state.embedding_provider = provider
+    _add_item(
+        client.app.state.session_factory,
+        item_id="screenshot-one",
+        owner_id="legacy-owner",
+        title="RAG architecture",
+        vector=[1.0, 0.0],
+    )
+
+    response = client.post(
+        "/api/v1/intelligence/agent",
+        json={"question": "semantic test question"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+    assert provider.embed_call_count == 1

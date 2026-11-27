@@ -19,21 +19,53 @@ class SearchResult:
     semantic_score: float | None = None
 
 
-def keyword_search(
+STOPWORDS = {
+    "the",
+    "a",
+    "an",
+    "of",
+    "to",
+    "in",
+    "on",
+    "for",
+    "and",
+    "or",
+    "is",
+    "are",
+    "was",
+    "were",
+    "me",
+    "my",
+    "i",
+    "show",
+    "find",
+    "give",
+    "what",
+    "which",
+    "where",
+    "when",
+    "how",
+    "that",
+    "this",
+    "with",
+    "about",
+    "from",
+}
+
+
+def _execute_keyword_query(
     session: Session,
     *,
+    dialect: str,
+    tokens: list[str],
+    operator: str,
     owner_id: str,
-    query: str,
     limit: int,
-) -> list[SearchResult]:
-    tokens = re.findall(r"[^\W_]+", query, flags=re.UNICODE)
-    if not tokens:
-        return []
-    dialect = session.get_bind().dialect.name
-    matching_ids: list[str]
+) -> list[str]:
     if dialect == "sqlite":
-        fts_query = " AND ".join(f'"{token}"' for token in tokens)
-        matching_ids = list(
+        joiner = f" {operator} "
+        fts_query = joiner.join(f'"{token}"' for token in tokens)
+        return list(
             session.execute(
                 sql_text(
                     "SELECT item_fts.item_id FROM item_fts "
@@ -45,23 +77,55 @@ def keyword_search(
                 {"fts_query": fts_query, "owner_id": owner_id, "limit": limit},
             ).scalars()
         )
-    else:
-        ts_query = " & ".join(tokens)
-        matching_ids = list(
-            session.execute(
-                sql_text(
-                    "SELECT id FROM items "
-                    "WHERE to_tsvector('simple', coalesce(title, '') || ' ' || "
-                    "coalesce(description, '') || ' ' || coalesce(tags::text, '')) "
-                    "@@ to_tsquery('simple', :ts_query) "
-                    "AND owner_id = :owner_id AND status = 'ready' "
-                    "ORDER BY ts_rank(to_tsvector('simple', coalesce(title, '') || ' ' || "
-                    "coalesce(description, '') || ' ' || coalesce(tags::text, '')), "
-                    "to_tsquery('simple', :ts_query)) DESC LIMIT :limit"
-                ),
-                {"ts_query": ts_query, "owner_id": owner_id, "limit": limit},
-            ).scalars()
-        )
+    ts_op = " & " if operator == "AND" else " | "
+    ts_query = ts_op.join(tokens)
+    return list(
+        session.execute(
+            sql_text(
+                "SELECT id FROM items "
+                "WHERE to_tsvector('simple', coalesce(title, '') || ' ' || "
+                "coalesce(description, '') || ' ' || coalesce(tags::text, '')) "
+                "@@ to_tsquery('simple', :ts_query) "
+                "AND owner_id = :owner_id AND status = 'ready' "
+                "ORDER BY ts_rank(to_tsvector('simple', coalesce(title, '') || ' ' || "
+                "coalesce(description, '') || ' ' || coalesce(tags::text, '')), "
+                "to_tsquery('simple', :ts_query)) DESC LIMIT :limit"
+            ),
+            {"ts_query": ts_query, "owner_id": owner_id, "limit": limit},
+        ).scalars()
+    )
+
+
+def keyword_search(
+    session: Session,
+    *,
+    owner_id: str,
+    query: str,
+    limit: int,
+) -> list[SearchResult]:
+    tokens = re.findall(r"[^\W_]+", query, flags=re.UNICODE)
+    if not tokens:
+        return []
+    dialect = session.get_bind().dialect.name
+    matching_ids = _execute_keyword_query(
+        session,
+        dialect=dialect,
+        tokens=tokens,
+        operator="AND",
+        owner_id=owner_id,
+        limit=limit,
+    )
+    if not matching_ids:
+        or_tokens = [t for t in tokens if len(t) >= 2 and t.lower() not in STOPWORDS]
+        if or_tokens:
+            matching_ids = _execute_keyword_query(
+                session,
+                dialect=dialect,
+                tokens=or_tokens,
+                operator="OR",
+                owner_id=owner_id,
+                limit=limit,
+            )
     if not matching_ids:
         return []
     items = session.scalars(
