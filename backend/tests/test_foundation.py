@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import Settings
 from app.main import create_app
-from tests.conftest import FakeClassifier
+from tests.conftest import FakeClassifier, FakeExtractor
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -31,6 +31,7 @@ def test_readiness_checks_schema_and_storage(tmp_path):
     app = create_app(
         Settings(database_path=database_path, storage_path=storage_path, api_key="test-api-key"),
         classifier=FakeClassifier(),
+        extractor=FakeExtractor(),
     )
 
     with TestClient(app, headers={"X-API-Key": "test-api-key"}) as client:
