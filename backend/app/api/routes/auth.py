@@ -41,6 +41,10 @@ SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 
 
 def set_session_cookie(response: Response, settings: Settings, token: str) -> None:
+    is_secure = settings.auth_cookie_secure or settings.environment.lower() in {
+        "production",
+        "prod",
+    }
     response.headers["Cache-Control"] = "no-store"
     response.set_cookie(
         key=settings.auth_cookie_name,
@@ -48,17 +52,27 @@ def set_session_cookie(response: Response, settings: Settings, token: str) -> No
         max_age=settings.auth_session_ttl_days * 24 * 60 * 60,
         path=COOKIE_PATH,
         httponly=True,
-        # `lax` keeps the cookie out of cross-site form posts while still
-        # surviving a normal navigation back into the app.
-        samesite="lax",
-        secure=settings.auth_cookie_secure
-        or settings.environment.lower() in {"production", "prod"},
+        # Cross-origin deployments (e.g. Vercel frontend → Render backend)
+        # require samesite="none" + secure=True so the browser will attach the
+        # cookie on credentialed fetch() calls across origins.  For local HTTP
+        # dev keep "lax" so the cookie still works without HTTPS.
+        samesite="none" if is_secure else "lax",
+        secure=is_secure,
     )
 
 
 def clear_session_cookie(response: Response, settings: Settings) -> None:
+    is_secure = settings.auth_cookie_secure or settings.environment.lower() in {
+        "production",
+        "prod",
+    }
     response.headers["Cache-Control"] = "no-store"
-    response.delete_cookie(key=settings.auth_cookie_name, path=COOKIE_PATH)
+    response.delete_cookie(
+        key=settings.auth_cookie_name,
+        path=COOKIE_PATH,
+        samesite="none" if is_secure else "lax",
+        secure=is_secure,
+    )
 
 
 @router.get("/status", response_model=AuthStatusResponse)

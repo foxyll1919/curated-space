@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_path: Path = BACKEND_DIR / "curated_space.db"
     storage_path: Path = BACKEND_DIR / "uploads"
+    database_url: SecretStr | None = None
+    supabase_url: str | None = None
+    supabase_service_role_key: SecretStr | None = None
+    supabase_storage_bucket: str = "screenshots"
     gemini_api_key: SecretStr | None = None
 
     # Milestone 9: one configured key maps to one stable owner identity.

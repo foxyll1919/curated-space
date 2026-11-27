@@ -35,7 +35,14 @@ def _database_status(request: Request) -> str:
         return "unavailable"
 
 
-def _storage_status(storage_path: Path) -> str:
+def _storage_status(request: Request) -> str:
+    storage = getattr(request.app.state, "storage", None)
+    if storage is not None and hasattr(storage, "is_healthy"):
+        try:
+            return "ok" if storage.is_healthy() else "unavailable"
+        except Exception:
+            return "unavailable"
+    storage_path: Path = request.app.state.settings.storage_path
     try:
         storage_path.mkdir(parents=True, exist_ok=True)
         with NamedTemporaryFile(prefix=".ready-", dir=storage_path, delete=True):
@@ -75,7 +82,7 @@ def ready(request: Request, response: Response) -> ReadyResponse:
     api_auth, session_auth = _auth_status(request)
     components = {
         "database": _database_status(request),
-        "storage": _storage_status(request.app.state.settings.storage_path),
+        "storage": _storage_status(request),
         "classifier": _classifier_status(request),
         "api_auth": api_auth,
         "session_auth": session_auth,

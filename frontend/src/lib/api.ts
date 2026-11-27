@@ -104,8 +104,12 @@ export type ItemQuery = {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
-    // Same-origin by default, so the session cookie rides along on its own.
-    response = await fetch(`${BASE}${path}`, { credentials: 'same-origin', ...init })
+    // `include` sends the httpOnly session cookie on cross-origin requests
+    // (Vercel frontend → Render backend). The backend must echo the exact
+    // origin back in Access-Control-Allow-Origin (not "*") and set
+    // Access-Control-Allow-Credentials: true, which CORSMiddleware does
+    // automatically when `allow_credentials=True` and an origin list is set.
+    response = await fetch(`${BASE}${path}`, { credentials: 'include', ...init })
   } catch (cause) {
     throw toTransportError(cause)
   }

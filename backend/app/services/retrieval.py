@@ -29,19 +29,39 @@ def keyword_search(
     tokens = re.findall(r"[^\W_]+", query, flags=re.UNICODE)
     if not tokens:
         return []
-    fts_query = " AND ".join(f'"{token}"' for token in tokens)
-    matching_ids: list[str] = list(
-        session.execute(
-            sql_text(
-                "SELECT item_fts.item_id FROM item_fts "
-                "JOIN items ON items.id = item_fts.item_id "
-                "WHERE item_fts MATCH :fts_query "
-                "AND items.owner_id = :owner_id AND items.status = 'ready' "
-                "ORDER BY bm25(item_fts) LIMIT :limit"
-            ),
-            {"fts_query": fts_query, "owner_id": owner_id, "limit": limit},
-        ).scalars()
-    )
+    dialect = session.get_bind().dialect.name
+    matching_ids: list[str]
+    if dialect == "sqlite":
+        fts_query = " AND ".join(f'"{token}"' for token in tokens)
+        matching_ids = list(
+            session.execute(
+                sql_text(
+                    "SELECT item_fts.item_id FROM item_fts "
+                    "JOIN items ON items.id = item_fts.item_id "
+                    "WHERE item_fts MATCH :fts_query "
+                    "AND items.owner_id = :owner_id AND items.status = 'ready' "
+                    "ORDER BY bm25(item_fts) LIMIT :limit"
+                ),
+                {"fts_query": fts_query, "owner_id": owner_id, "limit": limit},
+            ).scalars()
+        )
+    else:
+        ts_query = " & ".join(tokens)
+        matching_ids = list(
+            session.execute(
+                sql_text(
+                    "SELECT id FROM items "
+                    "WHERE to_tsvector('simple', coalesce(title, '') || ' ' || "
+                    "coalesce(description, '') || ' ' || coalesce(tags::text, '')) "
+                    "@@ to_tsquery('simple', :ts_query) "
+                    "AND owner_id = :owner_id AND status = 'ready' "
+                    "ORDER BY ts_rank(to_tsvector('simple', coalesce(title, '') || ' ' || "
+                    "coalesce(description, '') || ' ' || coalesce(tags::text, '')), "
+                    "to_tsquery('simple', :ts_query)) DESC LIMIT :limit"
+                ),
+                {"ts_query": ts_query, "owner_id": owner_id, "limit": limit},
+            ).scalars()
+        )
     if not matching_ids:
         return []
     items = session.scalars(

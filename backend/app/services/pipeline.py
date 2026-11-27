@@ -362,23 +362,44 @@ def list_items(
     second resolution, so items saved in the same second would be skipped or
     repeated. Pairing it with the id gives a strict total order.
     """
+    dialect = session.get_bind().dialect.name
     query = select(Item).where(
         Item.owner_id.is_(None) if owner_id is None else Item.owner_id == owner_id
     )
     if status:
         query = query.where(Item.status == status)
     if label:
-        query = query.where(
-            text("EXISTS (SELECT 1 FROM json_each(items.labels) WHERE json_each.value = :label)")
-        ).params(label=label)
+        if dialect == "sqlite":
+            query = query.where(
+                text(
+                    "EXISTS (SELECT 1 FROM json_each(items.labels) WHERE json_each.value = :label)"
+                )
+            ).params(label=label)
+        else:
+            query = query.where(
+                text(
+                    "EXISTS (SELECT 1 FROM jsonb_each_text(items.labels::jsonb) AS kv "
+                    "WHERE kv.value = :label)"
+                )
+            ).params(label=label)
     if q:
         tokens = re.findall(r"[^\W_]+", q, flags=re.UNICODE)
         if not tokens:
             raise BadRequestError("Search query must contain at least one letter or number.")
-        fts_query = " AND ".join(f'"{token}"' for token in tokens)
-        fts = table("item_fts", column("item_id", String))
-        matching_ids = select(fts.c.item_id).where(text("item_fts MATCH :fts_query"))
-        query = query.where(Item.id.in_(matching_ids)).params(fts_query=fts_query)
+        if dialect == "sqlite":
+            fts_query = " AND ".join(f'"{token}"' for token in tokens)
+            fts = table("item_fts", column("item_id", String))
+            matching_ids = select(fts.c.item_id).where(text("item_fts MATCH :fts_query"))
+            query = query.where(Item.id.in_(matching_ids)).params(fts_query=fts_query)
+        else:
+            ts_query = " & ".join(tokens)
+            query = query.where(
+                text(
+                    "to_tsvector('simple', coalesce(items.title, '') || ' ' || "
+                    "coalesce(items.description, '') || ' ' || coalesce(items.tags::text, '')) "
+                    "@@ to_tsquery('simple', :ts_query)"
+                )
+            ).params(ts_query=ts_query)
     if cursor:
         anchor = session.get(Item, cursor)
         if anchor is not None and anchor.created_at is not None:

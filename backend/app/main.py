@@ -38,7 +38,7 @@ from app.services.jobs import (
 )
 from app.services.pipeline import PipelineContext
 from app.services.rate_limit import FixedWindowRateLimiter
-from app.services.storage import LocalDiskStorage, Storage
+from app.services.storage import Storage, build_storage
 from app.services.embeddings import GeminiEmbeddingProvider
 
 
@@ -74,7 +74,7 @@ def create_app(
     configure_logging(app_settings.log_level)
     engine = create_database_engine(app_settings)
     app_extractor = extractor or GeminiExtractor(app_settings)
-    app_storage = storage or LocalDiskStorage(app_settings.storage_path)
+    app_storage = storage or build_storage(app_settings)
     app_classifier = classifier or build_classifier(app_settings)
     app_embedding_provider = GeminiEmbeddingProvider(app_settings)
     pipeline_context = PipelineContext(

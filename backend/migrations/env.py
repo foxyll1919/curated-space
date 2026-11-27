@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 from app.core.config import get_settings
 from app.db.models import Base
-from app.db.session import make_database_url
+from app.db.session import is_sqlite_url, make_database_url, resolve_database_url
 
 
 config = context.config
@@ -16,22 +16,24 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def _migration_url():
+    database_path = config.attributes.get("database_path")
+    if database_path is not None:
+        return make_database_url(Path(database_path))
+    return resolve_database_url(get_settings())
+
+
 def run_migrations_offline() -> None:
-    url = make_database_url(get_settings().database_path)
+    url = _migration_url()
     context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
 
 def run_migrations_online() -> None:
-    database_path = config.attributes.get("database_path")
-    if database_path is None:
-        database_path = get_settings().database_path
-    database_url = make_database_url(Path(database_path))
-    connectable = create_engine(
-        database_url,
-        connect_args={"check_same_thread": False},
-    )
+    database_url = _migration_url()
+    connect_args = {"check_same_thread": False} if is_sqlite_url(database_url) else {}
+    connectable = create_engine(database_url, connect_args=connect_args)
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
