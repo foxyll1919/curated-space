@@ -46,7 +46,7 @@ export function LoginPage() {
   const confirmationId = useId()
 
   // Nobody has signed up yet, so create one; otherwise sign in.
-  const isCreate = choice ?? status?.users === 0
+  const isCreate = choice !== null ? choice === 'create' : status?.users === 0
 
   useEffect(() => {
     if (error) emailRef.current?.focus()
