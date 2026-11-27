@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -11,6 +12,7 @@ from app.services.retrieval import SearchResult, hybrid_search, keyword_search, 
 
 class AgentState(TypedDict, total=False):
     question: str
+    search_query: str
     owner_id: str
     session: Session
     provider: EmbeddingProvider
@@ -32,22 +34,30 @@ def run_agent(
         return "Semantic retrieval and answer generation are not configured.", [], []
 
     def supervisor(state: AgentState) -> AgentState:
+        q = state["question"]
         try:
-            route = provider.route(state["question"])
+            search_query = provider.rewrite_query(q, history)
+        except Exception:
+            search_query = q
+
+        try:
+            route = provider.route(search_query)
         except Exception:
             route = "hybrid"
         return {
             **state,
+            "search_query": search_query,
             "route": route,
             "tool_trace": [f"{route}_search"],
         }
 
     def retrieval(state: AgentState) -> AgentState:
         route = state["route"]
+        query = state.get("search_query", state["question"])
         if route == "keyword":
-            found = keyword_search(session, owner_id=owner_id, query=state["question"], limit=8)
+            found = keyword_search(session, owner_id=owner_id, query=query, limit=8)
         else:
-            vector = provider.embed_text(state["question"])
+            vector = provider.embed_text(query)
             semantic = semantic_search(
                 session,
                 owner_id=owner_id,
@@ -60,7 +70,7 @@ def run_agent(
                 keyword = keyword_search(
                     session,
                     owner_id=owner_id,
-                    query=state["question"],
+                    query=query,
                     limit=8,
                 )
                 found = hybrid_search(keyword, semantic, 8)
@@ -73,6 +83,7 @@ def run_agent(
             return {
                 **state,
                 "answer": "I could not find enough information in your screenshot library.",
+                "results": [],
             }
         context_lines = []
         for result in results:
@@ -82,12 +93,14 @@ def run_agent(
                 f"Description: {item.description or ''}\n"
                 f"Tags: {', '.join(item.tags)}"
             )
-        answer = provider.answer(
+        ans = provider.answer(
             state["question"],
             "\n\n".join(context_lines),
             history,
         )
-        return {**state, "answer": answer}
+        cited_ids = set(re.findall(r"\[(?:screenshot\s+)?([a-zA-Z0-9_-]+)\]", ans))
+        cited_results = [r for r in results if r.item.id in cited_ids]
+        return {**state, "answer": ans, "results": cited_results if cited_results else results}
 
     builder = StateGraph(AgentState)
     builder.add_node("supervisor", supervisor)

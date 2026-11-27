@@ -143,13 +143,18 @@ def keyword_search(
     ]
 
 
+DEFAULT_MIN_SIMILARITY: float = 0.35
+
+
 def semantic_search(
     session: Session,
     *,
     owner_id: str,
     query_vector: list[float],
     limit: int,
+    min_score: float | None = None,
 ) -> list[SearchResult]:
+    threshold = DEFAULT_MIN_SIMILARITY if min_score is None else min_score
     rows = session.execute(
         select(Item, ItemEmbedding)
         .join(ItemEmbedding, ItemEmbedding.item_id == Item.id)
@@ -160,7 +165,8 @@ def semantic_search(
         vector = embedding.vector
         if isinstance(vector, list):
             score = cosine_similarity(query_vector, vector)
-            ranked.append((score, item))
+            if score >= threshold:
+                ranked.append((score, item))
     ranked.sort(key=lambda row: (row[0], row[1].created_at), reverse=True)
     return [
         SearchResult(

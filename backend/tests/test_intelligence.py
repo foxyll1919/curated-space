@@ -14,7 +14,7 @@ class FakeEmbeddingProvider:
 
     def embed_text(self, text: str) -> list[float]:
         lowered = text.lower()
-        if "rag" in lowered or "retrieval" in lowered:
+        if "rag" in lowered or "retrieval" in lowered or "simplest" in lowered:
             return [1.0, 0.0]
         return [0.0, 1.0]
 
@@ -26,6 +26,11 @@ class FakeEmbeddingProvider:
 
     def route(self, question: str) -> str:
         return "hybrid"
+
+    def rewrite_query(self, question: str, history: str = "") -> str:
+        if "second one" in question.lower() and "invoice" in history.lower():
+            return "second invoice reference"
+        return question
 
 
 def _add_item(
@@ -206,6 +211,9 @@ def test_gemini_failure_returns_200_with_insufficient_evidence(client):
         def route(self, question: str) -> str:
             raise RuntimeError("Gemini route failure")
 
+        def rewrite_query(self, question: str, history: str = "") -> str:
+            raise RuntimeError("Gemini rewrite failure")
+
     client.app.state.embedding_provider = CrashingProvider()
 
     # Test /ask
@@ -261,3 +269,53 @@ def test_agent_embed_called_once_for_semantic_route(client):
     )
     assert response.status_code == 200
     assert provider.embed_call_count == 1
+
+
+def test_semantic_cutoff_excludes_low_similarity(client):
+    provider = FakeEmbeddingProvider()
+    client.app.state.embedding_provider = provider
+    # Query for RAG gets [1.0, 0.0]
+    # screenshot-low gets [0.0, 1.0], cosine similarity is 0.0 < 0.35
+    _add_item(
+        client.app.state.session_factory,
+        item_id="screenshot-low",
+        owner_id="legacy-owner",
+        title="Unrelated cooking recipe",
+        vector=[0.0, 1.0],
+    )
+
+    response = client.get(
+        "/api/v1/intelligence/search",
+        params={"q": "RAG architecture", "mode": "semantic"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+    assert response.json()["items"] == []
+
+
+def test_follow_up_question_rewriting(client):
+    provider = FakeEmbeddingProvider()
+    client.app.state.embedding_provider = provider
+    _add_item(
+        client.app.state.session_factory,
+        item_id="second-invoice",
+        owner_id="legacy-owner",
+        title="Second invoice reference",
+        vector=[0.0, 1.0],
+    )
+
+    response = client.post(
+        "/api/v1/intelligence/agent",
+        json={
+            "question": "What about the second one?",
+            "history": [
+                {"role": "user", "content": "Show me invoice screenshots"},
+                {"role": "assistant", "content": "Here is the first invoice [first-invoice]."},
+            ],
+        },
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    # Query was rewritten to "second invoice reference" which matches "second-invoice" item!
+    assert any(s["id"] == "second-invoice" for s in body["sources"])

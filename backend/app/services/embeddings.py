@@ -24,6 +24,8 @@ class EmbeddingProvider(Protocol):
 
     def route(self, question: str) -> str: ...
 
+    def rewrite_query(self, question: str, history: str = "") -> str: ...
+
 
 class UnavailableEmbeddingProvider:
     @property
@@ -42,6 +44,9 @@ class UnavailableEmbeddingProvider:
 
     def route(self, question: str) -> str:
         return "hybrid"
+
+    def rewrite_query(self, question: str, history: str = "") -> str:
+        return question
 
 
 class GeminiEmbeddingProvider:
@@ -126,6 +131,29 @@ class GeminiEmbeddingProvider:
         )
         route = (getattr(response, "text", "") or "").strip().lower()
         return route if route in {"keyword", "semantic", "hybrid"} else "hybrid"
+
+    def rewrite_query(self, question: str, history: str = "") -> str:
+        if not history.strip():
+            return question
+        prompt = (
+            "Given the conversation history and a follow-up question, rewrite the question "
+            "into a standalone search query that can be used to search a screenshot library.\n"
+            "If the question is already fully self-contained, return it unchanged.\n"
+            "Return ONLY the rewritten query text, with no explanations or punctuation.\n\n"
+            f"CONVERSATION HISTORY:\n{history}\n\n"
+            f"FOLLOW-UP QUESTION:\n{question}\n\n"
+            "STANDALONE SEARCH QUERY:"
+        )
+        try:
+            response = self._get_client().models.generate_content(
+                model=self._settings.gemini_answer_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.0, max_output_tokens=50),
+            )
+            rewritten = (getattr(response, "text", "") or "").strip()
+            return rewritten if rewritten else question
+        except Exception:
+            return question
 
 
 def embedding_text(title: str | None, description: str | None, tags: list[str]) -> str:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 
@@ -148,8 +149,13 @@ def ask(
         )
 
     try:
-        keyword = keyword_search(session, owner_id=owner_id, query=body.question, limit=8)
-        query_vector = provider.embed_text(body.question)
+        try:
+            search_query = provider.rewrite_query(body.question, history)
+        except Exception:
+            search_query = body.question
+
+        keyword = keyword_search(session, owner_id=owner_id, query=search_query, limit=8)
+        query_vector = provider.embed_text(search_query)
         semantic = semantic_search(
             session,
             owner_id=owner_id,
@@ -173,9 +179,12 @@ def ask(
                 f"Tags: {', '.join(item.tags)}"
             )
         answer = provider.answer(body.question, "\n\n".join(context_lines), history)
+        cited_ids = set(re.findall(r"\[(?:screenshot\s+)?([a-zA-Z0-9_-]+)\]", answer))
+        cited_results = [r for r in results if r.item.id in cited_ids]
+        final_sources = cited_results if cited_results else results
         return AskResponse(
             answer=answer,
-            sources=[_source(result) for result in results],
+            sources=[_source(result) for result in final_sources],
             insufficient_evidence=False,
         )
     except Exception:
