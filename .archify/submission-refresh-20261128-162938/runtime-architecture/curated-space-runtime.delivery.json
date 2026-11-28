@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "2f69ac4a-dc1f-4fa2-96cb-6fc65550268e",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\curated-space-runtime.html",
+  "specification": {
+    "sha256": "57cc62c931b5dc6722426bb4f55efca7266c961612090bfab98cf33682283d56",
+    "bytes": 9196
+  },
+  "artifact": {
+    "sha256": "0e20ab7d6e3a9835b88b6d4a8b5d1eb063fcb618c7fd649129527f3266c5cb55",
+    "bytes": 777289
+  }
+}

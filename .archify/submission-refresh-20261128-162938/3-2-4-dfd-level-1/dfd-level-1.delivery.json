@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "8d4ea0b7-8d37-490a-ace8-62393151a940",
+  "status": "current",
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-4-dfd-level-1\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-4-dfd-level-1\\dfd-level-1.html",
+  "specification": {
+    "sha256": "374448a761698f6cff91751960279bcef66b9e03e112138cd0623ceff6a3f63b",
+    "bytes": 6542
+  },
+  "artifact": {
+    "sha256": "bf59272ebc89a32737aaa35c930361874b381f51fd1f007bb07d17cc4276ae1a",
+    "bytes": 763521
+  }
+}

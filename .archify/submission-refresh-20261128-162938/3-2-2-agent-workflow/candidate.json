@@ -1,0 +1,290 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "3.2.2 Agent Workflow",
+    "output": ".archify/submission-refresh-20261128-162938/3-2-2-agent-workflow/agent-workflow.html",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "viewBox": [
+      902,
+      528
+    ],
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "c1398927836e5429f5cf2182ef4f7df6c09ae48f"
+    }
+  },
+  "lanes": [
+    {
+      "id": "owner",
+      "label": "Owner / Ask UI"
+    },
+    {
+      "id": "agent",
+      "label": "LangGraph Agent"
+    },
+    {
+      "id": "tools",
+      "label": "Retrieval"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "Question",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "route",
+      "label": "Rewrite + route",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "retrieve-answer",
+      "label": "Retrieve + respond",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "question",
+    "agent_endpoint",
+    "supervisor",
+    "retrieval",
+    "results",
+    "answer"
+  ],
+  "nodes": [
+    {
+      "id": "question",
+      "lane": "owner",
+      "col": 0,
+      "type": "frontend",
+      "label": "Ask a Question",
+      "sublabel": "Question + last 6 turns",
+      "sources": [
+        {
+          "path": "frontend/src/pages/AskPage.tsx",
+          "line": 14,
+          "end_line": 46
+        },
+        {
+          "path": "frontend/src/hooks/usePersistedMessages.ts",
+          "line": 26,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "agent_endpoint",
+      "lane": "agent",
+      "col": 1,
+      "type": "backend",
+      "label": "Agent Endpoint",
+      "sublabel": "POST /agent",
+      "sources": [
+        {
+          "path": "backend/app/api/routes/intelligence.py",
+          "line": 241,
+          "end_line": 270
+        }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "lane": "agent",
+      "col": 2,
+      "type": "backend",
+      "label": "Supervisor",
+      "sublabel": "Rewrite, then route",
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 36,
+          "end_line": 52
+        },
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 118,
+          "end_line": 158
+        }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "lane": "tools",
+      "col": 3,
+      "type": "backend",
+      "label": "Retrieval Node",
+      "sublabel": "Direct search calls",
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 54,
+          "end_line": 78
+        },
+        {
+          "path": "backend/app/services/retrieval.py",
+          "line": 99,
+          "end_line": 206
+        }
+      ]
+    },
+    {
+      "id": "results",
+      "lane": "tools",
+      "col": 4,
+      "type": "backend",
+      "label": "Ranked Results",
+      "sublabel": "RRF + 0.35 cutoff",
+      "sources": [
+        {
+          "path": "backend/app/services/retrieval.py",
+          "line": 146,
+          "end_line": 206
+        }
+      ]
+    },
+    {
+      "id": "answer",
+      "lane": "agent",
+      "col": 5,
+      "type": "backend",
+      "label": "Answer",
+      "sublabel": "Cited sources only",
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 80,
+          "end_line": 103
+        },
+        {
+          "path": "backend/app/api/routes/intelligence.py",
+          "line": 241,
+          "end_line": 270
+        }
+      ]
+    },
+    {
+      "id": "no_evidence",
+      "lane": "owner",
+      "col": 5,
+      "type": "security",
+      "label": "No Evidence",
+      "sublabel": "Fixed fallback",
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 81,
+          "end_line": 88
+        }
+      ]
+    },
+    {
+      "id": "not_configured",
+      "lane": "owner",
+      "col": 2,
+      "type": "security",
+      "label": "No Provider",
+      "sublabel": "Set Gemini key",
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 33,
+          "end_line": 34
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "question-to-endpoint",
+      "from": "question",
+      "to": "agent_endpoint",
+      "label": "POST question + history",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "endpoint-to-supervisor",
+      "from": "agent_endpoint",
+      "to": "supervisor",
+      "label": "run_agent(history)",
+      "variant": "default",
+      "role": "main"
+    },
+    {
+      "id": "supervisor-to-retrieval",
+      "from": "supervisor",
+      "to": "retrieval",
+      "label": "rewritten query + route",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "retrieval-to-results",
+      "from": "retrieval",
+      "to": "results",
+      "label": "ranked matches",
+      "variant": "default",
+      "role": "main",
+      "route": "straight"
+    },
+    {
+      "id": "results-to-answer",
+      "from": "results",
+      "to": "answer",
+      "label": "results found",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "results-to-fallback",
+      "from": "results",
+      "to": "no_evidence",
+      "label": "no results",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "endpoint-to-unavailable",
+      "from": "agent_endpoint",
+      "to": "not_configured",
+      "label": "provider not configured",
+      "variant": "security",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Single-Agent Graph",
+      "items": [
+        "One LangGraph agent runs supervisor, retrieval and answer nodes in a fixed order.",
+        "The graph is a one-pass sequence with no iterative reasoning or re-planning cycle."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "No Tool Layer",
+      "items": [
+        "The earlier LangChain tool wrapper has been removed; the retrieval node calls keyword_search, semantic_search and hybrid_search directly.",
+        "Search results are stored in agent state, so there is no second retrieval pass."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Follow-up Rewrite",
+      "items": [
+        "When history is present, Gemini rewrites the follow-up into a standalone query before routing.",
+        "Both the route and the search use the rewritten query; failures fall back to the original question."
+      ]
+    }
+  ]
+}

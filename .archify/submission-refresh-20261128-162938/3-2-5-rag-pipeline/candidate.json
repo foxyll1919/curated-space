@@ -1,0 +1,436 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "3.2.5 RAG Pipeline — Screenshot Library",
+    "output": ".archify/submission-refresh-20261128-162938/3-2-5-rag-pipeline/rag-pipeline.html",
+    "viewBox": [
+      1080,
+      690
+    ],
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "c1398927836e5429f5cf2182ef4f7df6c09ae48f"
+    }
+  },
+  "stages": [
+    {
+      "label": "Ingestion / Question"
+    },
+    {
+      "label": "API / Rewrite"
+    },
+    {
+      "label": "Extract / Search"
+    },
+    {
+      "label": "Text / Query Embedding"
+    },
+    {
+      "label": "Index / Grounded Response"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "uploaded_image",
+      "type": "external",
+      "label": "Screenshot",
+      "sublabel": "owner upload",
+      "stage": 0,
+      "row": 0,
+      "width": 140,
+      "sources": [
+        {
+          "path": "backend/app/api/routes/items.py",
+          "line": 46,
+          "end_line": 74
+        }
+      ]
+    },
+    {
+      "id": "question",
+      "type": "external",
+      "label": "Owner Question",
+      "sublabel": "Ask screen",
+      "stage": 0,
+      "row": 2,
+      "width": 150,
+      "sources": [
+        {
+          "path": "frontend/src/pages/AskPage.tsx",
+          "line": 20,
+          "end_line": 46
+        }
+      ]
+    },
+    {
+      "id": "upload_api",
+      "type": "backend",
+      "label": "Upload Firewall",
+      "sublabel": "sanitize before analysis",
+      "stage": 1,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        {
+          "path": "backend/app/api/routes/items.py",
+          "line": 57,
+          "end_line": 92
+        }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "type": "backend",
+      "label": "Query Rewrite + Route",
+      "sublabel": "Gemini rewrite, then strategy",
+      "stage": 1,
+      "row": 2,
+      "width": 165,
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 36,
+          "end_line": 52
+        },
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 118,
+          "end_line": 158
+        }
+      ]
+    },
+    {
+      "id": "extractor",
+      "type": "cloud",
+      "label": "Gemini Extractor",
+      "sublabel": "structured metadata",
+      "stage": 2,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        {
+          "path": "backend/app/services/extraction/gemini.py",
+          "line": 55,
+          "end_line": 105
+        }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "type": "backend",
+      "label": "Retrieval Node",
+      "sublabel": "keyword / semantic / hybrid calls",
+      "stage": 2,
+      "row": 2,
+      "width": 165,
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 54,
+          "end_line": 78
+        },
+        {
+          "path": "backend/app/services/retrieval.py",
+          "line": 99,
+          "end_line": 206
+        }
+      ]
+    },
+    {
+      "id": "metadata_text",
+      "type": "backend",
+      "label": "Joined Metadata Text",
+      "sublabel": "one joined text; no chunks",
+      "stage": 3,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 159,
+          "end_line": 167
+        },
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 240,
+          "end_line": 265
+        }
+      ]
+    },
+    {
+      "id": "query_embedder",
+      "type": "cloud",
+      "label": "Gemini Query Embedding",
+      "sublabel": "semantic / hybrid only",
+      "stage": 3,
+      "row": 3,
+      "width": 160,
+      "sources": [
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 81,
+          "end_line": 92
+        },
+        {
+          "path": "backend/app/core/config.py",
+          "line": 71,
+          "end_line": 75
+        }
+      ]
+    },
+    {
+      "id": "item_embedder",
+      "type": "cloud",
+      "label": "Gemini Item Embedder",
+      "sublabel": "one vector per screenshot",
+      "stage": 4,
+      "row": 0,
+      "width": 150,
+      "sources": [
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 81,
+          "end_line": 92
+        },
+        {
+          "path": "backend/app/core/config.py",
+          "line": 71,
+          "end_line": 75
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "type": "database",
+      "label": "Postgres / SQLite Index",
+      "sublabel": "items + embeddings + FTS",
+      "stage": 4,
+      "row": 1,
+      "width": 165,
+      "sources": [
+        {
+          "path": "backend/app/db/session.py",
+          "line": 24,
+          "end_line": 34
+        },
+        {
+          "path": "backend/app/db/models.py",
+          "line": 18,
+          "end_line": 68
+        },
+        {
+          "path": "backend/app/services/retrieval.py",
+          "line": 56,
+          "end_line": 140
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "type": "backend",
+      "label": "Citation Filter + Context",
+      "sublabel": "keep cited IDs; build context",
+      "stage": 4,
+      "row": 2,
+      "width": 165,
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 90,
+          "end_line": 103
+        },
+        {
+          "path": "backend/app/api/routes/intelligence.py",
+          "line": 175,
+          "end_line": 195
+        }
+      ]
+    },
+    {
+      "id": "answer_model",
+      "type": "cloud",
+      "label": "Gemini Answer Model",
+      "sublabel": "grounded answer + IDs",
+      "stage": 4,
+      "row": 3,
+      "width": 150,
+      "sources": [
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 94,
+          "end_line": 117
+        },
+        {
+          "path": "backend/app/api/routes/intelligence.py",
+          "line": 136,
+          "end_line": 196
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "image-in",
+      "from": "uploaded_image",
+      "to": "upload_api",
+      "label": "Image bytes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "extract-image",
+      "from": "upload_api",
+      "to": "extractor",
+      "label": "Sanitized PNG",
+      "labelAt": [
+        423,
+        201
+      ],
+      "variant": "security",
+      "classification": "image input"
+    },
+    {
+      "id": "extract-metadata",
+      "from": "extractor",
+      "to": "metadata_text",
+      "label": "Metadata fields",
+      "labelAt": [
+        638,
+        201
+      ],
+      "variant": "emphasis"
+    },
+    {
+      "id": "text-to-embed",
+      "from": "metadata_text",
+      "to": "item_embedder",
+      "label": "Joined text",
+      "labelAt": [
+        850,
+        201
+      ],
+      "variant": "default"
+    },
+    {
+      "id": "write-index",
+      "from": "item_embedder",
+      "to": "index",
+      "label": "One item vector",
+      "labelAt": [
+        960,
+        201
+      ],
+      "variant": "emphasis"
+    },
+    {
+      "id": "ask-question",
+      "from": "question",
+      "to": "supervisor",
+      "label": "Question + history",
+      "labelAt": [
+        208,
+        429
+      ],
+      "variant": "emphasis"
+    },
+    {
+      "id": "select-route",
+      "from": "supervisor",
+      "to": "retrieval",
+      "label": "Rewritten query + strategy",
+      "labelAt": [
+        423,
+        429
+      ],
+      "variant": "default"
+    },
+    {
+      "id": "query-embedding",
+      "from": "retrieval",
+      "to": "query_embedder",
+      "label": "Conditional query embed",
+      "labelAt": [
+        638,
+        435
+      ],
+      "variant": "default",
+      "route": "straight"
+    },
+    {
+      "id": "query-vector",
+      "from": "query_embedder",
+      "to": "index",
+      "label": "Query vector",
+      "labelAt": [
+        850,
+        347
+      ],
+      "variant": "default"
+    },
+    {
+      "id": "search-index",
+      "from": "retrieval",
+      "to": "index",
+      "label": "Owner-scoped FTS / vector search",
+      "labelAt": [
+        745,
+        321
+      ],
+      "variant": "security",
+      "classification": "ready items only"
+    },
+    {
+      "id": "ranked-candidates",
+      "from": "index",
+      "to": "context",
+      "label": "Ranked matches; RRF + 0.35 cutoff",
+      "labelAt": [
+        960,
+        321
+      ],
+      "variant": "emphasis"
+    },
+    {
+      "id": "grounding-context",
+      "from": "context",
+      "to": "answer_model",
+      "label": "Question + retrieved metadata",
+      "labelAt": [
+        960,
+        435
+      ],
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Follow-up Rewrite",
+      "items": [
+        "Chat history is persisted in the browser and the last six messages accompany each Ask request.",
+        "When history exists, Gemini rewrites the follow-up into a standalone query before routing; a failure falls back to the original question."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Retrieval Semantics",
+      "items": [
+        "Keyword search uses SQLite FTS5 or Postgres full-text search, and falls back from AND to OR with a stop-word list.",
+        "Semantic matches below a 0.35 cosine similarity score are dropped, so weak evidence yields no results."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Chunking Is Not Implemented",
+      "items": [
+        "Title, description and tags are joined into one text per screenshot.",
+        "There is no document splitter or multiple chunks per screenshot; each item has one embedding record.",
+        "Sources return only the screenshot IDs the answer cites, or all retrieved results when none are cited."
+      ]
+    }
+  ]
+}

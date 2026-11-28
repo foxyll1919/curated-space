@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "afc4b12b-48ec-4429-8e19-9e7837ea9886",
+  "status": "current",
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-8-agent-state\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-8-agent-state\\agent-state.html",
+  "specification": {
+    "sha256": "c02f88c5e9f19fbdd0ac3d874a536a402516b93349f3a0e61ee7749d8eecb20c",
+    "bytes": 6545
+  },
+  "artifact": {
+    "sha256": "0149386189b022cc71c2cdba6200b121f7ea2c47f5dd6dcfe8c9e70adaf3f40a",
+    "bytes": 763495
+  }
+}

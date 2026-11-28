@@ -1,0 +1,827 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-11-28T11:20:38.110Z",
+  "specification": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\candidate.json",
+    "sha256": "579909c287c533e9378204892c4f4625176517f656f69361e124abb02b5b5838",
+    "bytes": 9139
+  },
+  "artifact": {
+    "path": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\curated-space-runtime.html",
+    "sha256": "0e20ab7d6e3a9835b88b6d4a8b5d1eb063fcb618c7fd649129527f3266c5cb55",
+    "bytes": 777289
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\SUYASH\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\candidate.json",
+        "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\curated-space-runtime.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "55dc36e6-ea70-499c-834c-9fa2ebd46ffd",
+        "stage": "render",
+        "type": "architecture",
+        "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\candidate.json",
+        "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\curated-space-runtime.html",
+        "error": "Architecture layout validation failed:\n- Components \"ask\" and \"disk\" are less than 8px apart — move one or shrink its size.\n  \"ask\" [520, 430, 180, 66]; \"disk\" [490, 430, 180, 66]\n  Suggested fix: move \"disk\" pos to [708, 430] (right of \"ask\") or [490, 504] (below)\n- [clean-flow/edge-through-node] architecture connections[12] id \"ask-request\" \"api\" -> \"ask\" crosses component \"disk\" (unrelated to this relationship) on segment 2 [610, 373] -> [610, 430] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.\n- [composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[1] id \"authenticate\" \"api\" -> \"sqlite\" label \"Verify account session\" segment 0 [349, 316] -> [349, 406] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[3] id \"store-image\" \"api\" -> \"disk\" label \"Write sanitized image\" segment 0 [290.9, 316] -> [290.9, 427] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 0 [334, 316] -> [334, 373] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Analyze\" on connections[6] id \"run-analysis\" \"jobs\" -> \"pipeline\" label \"Analyze\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [721, 263, 44, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 2 [610, 373] -> [610, 430] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+        "diagnostics": [
+          {
+            "code": "clean-flow/edge-through-node",
+            "severity": "error",
+            "message": "[clean-flow/edge-through-node] architecture connections[12] id \"ask-request\" \"api\" -> \"ask\" crosses component \"disk\" (unrelated to this relationship) on segment 2 [610, 373] -> [610, 430] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 12,
+              "id": "ask-request",
+              "from": "api",
+              "to": "ask"
+            },
+            "evidence": {
+              "obstacleKind": "component",
+              "obstacleId": "disk",
+              "segmentIndex": 2,
+              "from": [
+                610,
+                373
+              ],
+              "to": [
+                610,
+                430
+              ],
+              "clearancePx": 2
+            },
+            "supportedFixes": [
+              "adjust fromSide/toSide, set route/via, or move the component"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[1] id \"authenticate\" \"api\" -> \"sqlite\" label \"Verify account session\" segment 0 [349, 316] -> [349, 406] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 2,
+              "id": "sanitize",
+              "from": "api",
+              "to": "firewall"
+            },
+            "evidence": {
+              "label": "Bound and sanitize bytes",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 1,
+                "id": "authenticate",
+                "from": "api",
+                "to": "sqlite"
+              },
+              "segmentIndex": 0,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "sanitize",
+                  "from": "api",
+                  "to": "firewall",
+                  "label": "Bound and sanitize bytes",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 2,
+                "label": "Bound and sanitize bytes",
+                "x": 258.4,
+                "y": 353,
+                "width": 125.19999999999999,
+                "height": 14,
+                "lx": 321,
+                "ly": 363
+              },
+              "from": [
+                349,
+                316
+              ],
+              "to": [
+                349,
+                406
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[3] id \"store-image\" \"api\" -> \"disk\" label \"Write sanitized image\" segment 0 [290.9, 316] -> [290.9, 427] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 2,
+              "id": "sanitize",
+              "from": "api",
+              "to": "firewall"
+            },
+            "evidence": {
+              "label": "Bound and sanitize bytes",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 3,
+                "id": "store-image",
+                "from": "api",
+                "to": "disk"
+              },
+              "segmentIndex": 0,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "sanitize",
+                  "from": "api",
+                  "to": "firewall",
+                  "label": "Bound and sanitize bytes",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 2,
+                "label": "Bound and sanitize bytes",
+                "x": 258.4,
+                "y": 353,
+                "width": 125.19999999999999,
+                "height": 14,
+                "lx": 321,
+                "ly": 363
+              },
+              "from": [
+                290.9,
+                316
+              ],
+              "to": [
+                290.9,
+                427
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 0 [334, 316] -> [334, 373] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 2,
+              "id": "sanitize",
+              "from": "api",
+              "to": "firewall"
+            },
+            "evidence": {
+              "label": "Bound and sanitize bytes",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 12,
+                "id": "ask-request",
+                "from": "api",
+                "to": "ask"
+              },
+              "segmentIndex": 0,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "sanitize",
+                  "from": "api",
+                  "to": "firewall",
+                  "label": "Bound and sanitize bytes",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 2,
+                "label": "Bound and sanitize bytes",
+                "x": 258.4,
+                "y": 353,
+                "width": 125.19999999999999,
+                "height": 14,
+                "lx": 321,
+                "ly": 363
+              },
+              "from": [
+                333.95,
+                316
+              ],
+              "to": [
+                333.95,
+                373
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Analyze\" on connections[6] id \"run-analysis\" \"jobs\" -> \"pipeline\" label \"Analyze\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [721, 263, 44, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 6,
+              "id": "run-analysis",
+              "from": "jobs",
+              "to": "pipeline"
+            },
+            "evidence": {
+              "label": "Analyze",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 14,
+                "id": "ask-provider",
+                "from": "ask",
+                "to": "gemini"
+              },
+              "segmentIndex": 1,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "run-analysis",
+                  "from": "jobs",
+                  "to": "pipeline",
+                  "label": "Analyze",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 6,
+                "label": "Analyze",
+                "x": 720.7,
+                "y": 263,
+                "width": 43.6,
+                "height": 14,
+                "lx": 742.5,
+                "ly": 273
+              },
+              "from": [
+                724,
+                456
+              ],
+              "to": [
+                724,
+                96
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 2 [610, 373] -> [610, 430] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 7,
+              "id": "read-image",
+              "from": "pipeline",
+              "to": "disk"
+            },
+            "evidence": {
+              "label": "Read image for analysis",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 12,
+                "id": "ask-request",
+                "from": "api",
+                "to": "ask"
+              },
+              "segmentIndex": 2,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "read-image",
+                  "from": "pipeline",
+                  "to": "disk",
+                  "label": "Read image for analysis"
+                },
+                "relationIndex": 7,
+                "label": "Read image for analysis",
+                "x": 605.3,
+                "y": 378,
+                "width": 120.39999999999999,
+                "height": 14,
+                "lx": 665.5,
+                "ly": 388
+              },
+              "from": [
+                610,
+                373
+              ],
+              "to": [
+                610,
+                430
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 7,
+              "id": "read-image",
+              "from": "pipeline",
+              "to": "disk"
+            },
+            "evidence": {
+              "label": "Read image for analysis",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 14,
+                "id": "ask-provider",
+                "from": "ask",
+                "to": "gemini"
+              },
+              "segmentIndex": 1,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "read-image",
+                  "from": "pipeline",
+                  "to": "disk",
+                  "label": "Read image for analysis"
+                },
+                "relationIndex": 7,
+                "label": "Read image for analysis",
+                "x": 605.3,
+                "y": 378,
+                "width": 120.39999999999999,
+                "height": 14,
+                "lx": 665.5,
+                "ly": 388
+              },
+              "from": [
+                724,
+                456
+              ],
+              "to": [
+                724,
+                96
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "layout/constraint",
+            "severity": "error",
+            "message": "Components \"ask\" and \"disk\" are less than 8px apart — move one or shrink its size.\n  \"ask\" [520, 430, 180, 66]; \"disk\" [490, 430, 180, 66]\n  Suggested fix: move \"disk\" pos to [708, 430] (right of \"ask\") or [490, 504] (below)",
+            "subject": {
+              "diagramType": "architecture"
+            },
+            "evidence": {},
+            "supportedFixes": []
+          }
+        ],
+        "provenance": "failed",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "diagnostics": [
+    {
+      "code": "clean-flow/edge-through-node",
+      "severity": "error",
+      "message": "[clean-flow/edge-through-node] architecture connections[12] id \"ask-request\" \"api\" -> \"ask\" crosses component \"disk\" (unrelated to this relationship) on segment 2 [610, 373] -> [610, 430] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 12,
+        "id": "ask-request",
+        "from": "api",
+        "to": "ask"
+      },
+      "evidence": {
+        "obstacleKind": "component",
+        "obstacleId": "disk",
+        "segmentIndex": 2,
+        "from": [
+          610,
+          373
+        ],
+        "to": [
+          610,
+          430
+        ],
+        "clearancePx": 2
+      },
+      "supportedFixes": [
+        "adjust fromSide/toSide, set route/via, or move the component"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[1] id \"authenticate\" \"api\" -> \"sqlite\" label \"Verify account session\" segment 0 [349, 316] -> [349, 406] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 2,
+        "id": "sanitize",
+        "from": "api",
+        "to": "firewall"
+      },
+      "evidence": {
+        "label": "Bound and sanitize bytes",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 1,
+          "id": "authenticate",
+          "from": "api",
+          "to": "sqlite"
+        },
+        "segmentIndex": 0,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "sanitize",
+            "from": "api",
+            "to": "firewall",
+            "label": "Bound and sanitize bytes",
+            "variant": "emphasis"
+          },
+          "relationIndex": 2,
+          "label": "Bound and sanitize bytes",
+          "x": 258.4,
+          "y": 353,
+          "width": 125.19999999999999,
+          "height": 14,
+          "lx": 321,
+          "ly": 363
+        },
+        "from": [
+          349,
+          316
+        ],
+        "to": [
+          349,
+          406
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[3] id \"store-image\" \"api\" -> \"disk\" label \"Write sanitized image\" segment 0 [290.9, 316] -> [290.9, 427] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 2,
+        "id": "sanitize",
+        "from": "api",
+        "to": "firewall"
+      },
+      "evidence": {
+        "label": "Bound and sanitize bytes",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 3,
+          "id": "store-image",
+          "from": "api",
+          "to": "disk"
+        },
+        "segmentIndex": 0,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "sanitize",
+            "from": "api",
+            "to": "firewall",
+            "label": "Bound and sanitize bytes",
+            "variant": "emphasis"
+          },
+          "relationIndex": 2,
+          "label": "Bound and sanitize bytes",
+          "x": 258.4,
+          "y": 353,
+          "width": 125.19999999999999,
+          "height": 14,
+          "lx": 321,
+          "ly": 363
+        },
+        "from": [
+          290.9,
+          316
+        ],
+        "to": [
+          290.9,
+          427
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Bound and sanitize bytes\" on connections[2] id \"sanitize\" \"api\" -> \"firewall\" label \"Bound and sanitize bytes\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 0 [334, 316] -> [334, 373] (label rect [258, 353, 125, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 2,
+        "id": "sanitize",
+        "from": "api",
+        "to": "firewall"
+      },
+      "evidence": {
+        "label": "Bound and sanitize bytes",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 12,
+          "id": "ask-request",
+          "from": "api",
+          "to": "ask"
+        },
+        "segmentIndex": 0,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "sanitize",
+            "from": "api",
+            "to": "firewall",
+            "label": "Bound and sanitize bytes",
+            "variant": "emphasis"
+          },
+          "relationIndex": 2,
+          "label": "Bound and sanitize bytes",
+          "x": 258.4,
+          "y": 353,
+          "width": 125.19999999999999,
+          "height": 14,
+          "lx": 321,
+          "ly": 363
+        },
+        "from": [
+          333.95,
+          316
+        ],
+        "to": [
+          333.95,
+          373
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Analyze\" on connections[6] id \"run-analysis\" \"jobs\" -> \"pipeline\" label \"Analyze\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [721, 263, 44, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 6,
+        "id": "run-analysis",
+        "from": "jobs",
+        "to": "pipeline"
+      },
+      "evidence": {
+        "label": "Analyze",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 14,
+          "id": "ask-provider",
+          "from": "ask",
+          "to": "gemini"
+        },
+        "segmentIndex": 1,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "run-analysis",
+            "from": "jobs",
+            "to": "pipeline",
+            "label": "Analyze",
+            "variant": "emphasis"
+          },
+          "relationIndex": 6,
+          "label": "Analyze",
+          "x": 720.7,
+          "y": 263,
+          "width": 43.6,
+          "height": 14,
+          "lx": 742.5,
+          "ly": 273
+        },
+        "from": [
+          724,
+          456
+        ],
+        "to": [
+          724,
+          96
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[12] id \"ask-request\" \"api\" -> \"ask\" label \"Ask question + history\" segment 2 [610, 373] -> [610, 430] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 7,
+        "id": "read-image",
+        "from": "pipeline",
+        "to": "disk"
+      },
+      "evidence": {
+        "label": "Read image for analysis",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 12,
+          "id": "ask-request",
+          "from": "api",
+          "to": "ask"
+        },
+        "segmentIndex": 2,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "read-image",
+            "from": "pipeline",
+            "to": "disk",
+            "label": "Read image for analysis"
+          },
+          "relationIndex": 7,
+          "label": "Read image for analysis",
+          "x": 605.3,
+          "y": 378,
+          "width": 120.39999999999999,
+          "height": 14,
+          "lx": 665.5,
+          "ly": 388
+        },
+        "from": [
+          610,
+          373
+        ],
+        "to": [
+          610,
+          430
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Read image for analysis\" on connections[7] id \"read-image\" \"pipeline\" -> \"disk\" label \"Read image for analysis\" is 0px from connections[14] id \"ask-provider\" \"ask\" -> \"gemini\" label \"Gemini calls\" segment 1 [724, 456] -> [724, 96] (label rect [605, 378, 120, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 7,
+        "id": "read-image",
+        "from": "pipeline",
+        "to": "disk"
+      },
+      "evidence": {
+        "label": "Read image for analysis",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 14,
+          "id": "ask-provider",
+          "from": "ask",
+          "to": "gemini"
+        },
+        "segmentIndex": 1,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "read-image",
+            "from": "pipeline",
+            "to": "disk",
+            "label": "Read image for analysis"
+          },
+          "relationIndex": 7,
+          "label": "Read image for analysis",
+          "x": 605.3,
+          "y": 378,
+          "width": 120.39999999999999,
+          "height": 14,
+          "lx": 665.5,
+          "ly": 388
+        },
+        "from": [
+          724,
+          456
+        ],
+        "to": [
+          724,
+          96
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Components \"ask\" and \"disk\" are less than 8px apart — move one or shrink its size.\n  \"ask\" [520, 430, 180, 66]; \"disk\" [490, 430, 180, 66]\n  Suggested fix: move \"disk\" pos to [708, 430] (right of \"ask\") or [490, 504] (below)",
+      "subject": {
+        "diagramType": "architecture"
+      },
+      "evidence": {},
+      "supportedFixes": []
+    }
+  ],
+  "evidence": {
+    "receipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\review-2\\curated-space-runtime.finalize.json",
+    "summaryReceipt": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\runtime-architecture\\review-2\\curated-space-runtime.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-11-28T11:20:39.228Z",
+  "durationMs": 1117,
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.3.2",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.3.2",
+    "severity": "normal",
+    "checkedAt": "2026-11-28T11:02:45.084Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.3.2. A previous check at 2026-11-28T11:02:45.084Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.3.2. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:932d915f83fdbf44796cc6b20b085455a763491306e1b8dee92047e11dddc0ea"
+  }
+}

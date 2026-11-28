@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "46a096fc-f493-4b73-9052-0e58025983d5",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-7-agent-sequence\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-7-agent-sequence\\agent-sequence.html",
+  "specification": {
+    "sha256": "fd0a95a4cf1fdc6e32dddd06ecf9790ccd4a6098ffd344a04c11599add870a1a",
+    "bytes": 5467
+  },
+  "artifact": {
+    "sha256": "bdec208cdc4e38521d5a1d0e1e254df4a7c0dac6096ab1930595ecd760a69b11",
+    "bytes": 762560
+  }
+}

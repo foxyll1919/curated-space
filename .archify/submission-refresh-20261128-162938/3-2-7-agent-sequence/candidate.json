@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "3.2.7 User–Agent–LLM Sequence",
+    "output": ".archify/submission-refresh-20261128-162938/3-2-7-agent-sequence/agent-sequence.html",
+    "column_fit": "fixed",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "c1398927836e5429f5cf2182ef4f7df6c09ae48f"
+    }
+  },
+  "participants": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Owner",
+      "sublabel": "asks a question",
+      "sources": [
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 14, "end_line": 46 }
+      ]
+    },
+    {
+      "id": "ui_api",
+      "type": "frontend",
+      "label": "Ask UI + API",
+      "sublabel": "question / response",
+      "sources": [
+        { "path": "frontend/src/pages/AskPage.tsx", "line": 20, "end_line": 46 },
+        { "path": "frontend/src/hooks/usePersistedMessages.ts", "line": 26, "end_line": 40 },
+        { "path": "backend/app/api/routes/intelligence.py", "line": 241, "end_line": 270 }
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Agent",
+      "sublabel": "one-pass graph",
+      "sources": [
+        { "path": "backend/app/services/agent.py", "line": 25, "end_line": 122 }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "cloud",
+      "label": "Gemini",
+      "sublabel": "AI calls",
+      "sources": [
+        { "path": "backend/app/services/embeddings.py", "line": 94, "end_line": 158 },
+        { "path": "backend/app/core/config.py", "line": 71, "end_line": 75 }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "type": "backend",
+      "label": "Retrieval",
+      "sublabel": "search functions",
+      "sources": [
+        { "path": "backend/app/services/retrieval.py", "line": 99, "end_line": 206 }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Database",
+      "sublabel": "Postgres / SQLite",
+      "sources": [
+        { "path": "backend/app/db/session.py", "line": 24, "end_line": 34 },
+        { "path": "backend/app/db/models.py", "line": 122, "end_line": 140 },
+        { "path": "backend/app/services/retrieval.py", "line": 56, "end_line": 140 }
+      ]
+    }
+  ],
+  "messages": [
+    { "id": "ask-question", "from": "owner", "to": "ui_api", "y": 160, "label": "Ask about screenshots" },
+    { "id": "post-agent", "from": "ui_api", "to": "agent", "y": 193, "label": "POST question + history", "variant": "emphasis" },
+    { "id": "rewrite-call", "from": "agent", "to": "gemini", "y": 226, "label": "Rewrite follow-up with history" },
+    { "id": "rewrite-result", "from": "gemini", "to": "agent", "y": 259, "label": "Standalone search query", "variant": "return" },
+    { "id": "route-call", "from": "agent", "to": "gemini", "y": 292, "label": "Route rewritten query" },
+    { "id": "route-result", "from": "gemini", "to": "agent", "y": 325, "label": "keyword / semantic / hybrid", "variant": "return" },
+    { "id": "embed-call", "from": "agent", "to": "gemini", "y": 358, "label": "Embed query (semantic / hybrid)" },
+    { "id": "embed-result", "from": "gemini", "to": "agent", "y": 391, "label": "Query vector", "variant": "return" },
+    { "id": "search-call", "from": "agent", "to": "retrieval", "y": 424, "label": "Run selected search", "variant": "emphasis" },
+    { "id": "search-db", "from": "retrieval", "to": "db", "y": 457, "label": "Owner-scoped FTS / vector scan" },
+    { "id": "search-rows", "from": "db", "to": "retrieval", "y": 490, "label": "Matches + vector scores", "variant": "return" },
+    { "id": "ranked-rows", "from": "retrieval", "to": "agent", "y": 523, "label": "Ranked results (RRF)", "variant": "return" },
+    { "id": "answer-prompt", "from": "agent", "to": "gemini", "y": 556, "label": "Question + retrieved context", "variant": "security", "note": "Only when results exist; otherwise a fixed fallback is returned" },
+    { "id": "answer-text", "from": "gemini", "to": "agent", "y": 589, "label": "Grounded answer + IDs", "variant": "return" },
+    { "id": "response-object", "from": "agent", "to": "ui_api", "y": 622, "label": "Answer + cited sources + trace", "variant": "return" },
+    { "id": "response-ui", "from": "ui_api", "to": "owner", "y": 655, "label": "Display answer + citations", "variant": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Follow-up Rewrite",
+      "items": [
+        "Ask history is persisted in the browser and the last six messages are sent with each question.",
+        "When history is present, the supervisor rewrites the question into a standalone query before routing; on failure it searches the original question."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "No Tool Round-Trip",
+      "items": [
+        "The LangChain search tool was removed, so the retrieval node calls the search functions once and keeps the returned records.",
+        "There is no discarded tool result and no second retrieval pass."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Evidence Control",
+      "items": [
+        "Semantic matches below a 0.35 cosine similarity score are dropped.",
+        "Returned sources are filtered to the screenshot IDs the answer actually cites, falling back to all retrieved results when none are cited."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3a7ff88e-ea25-46db-8bb4-2e69ac4eb6fb",
+  "status": "current",
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-5-rag-pipeline\\candidate.json",
+  "output": "C:\\Users\\SUYASH\\Documents\\working projects\\curated-space-main\\.archify\\submission-refresh-20261128-162938\\3-2-5-rag-pipeline\\rag-pipeline.html",
+  "specification": {
+    "sha256": "71f259b6c90568c83e4d831638d2c6a414d451d4d6e009b4114c0aad56ca33e5",
+    "bytes": 10324
+  },
+  "artifact": {
+    "sha256": "a55ef82eaa2c533599984d84f0c1a7cdaf42af9606869d1e0d89b7a51b201636",
+    "bytes": 770953
+  }
+}

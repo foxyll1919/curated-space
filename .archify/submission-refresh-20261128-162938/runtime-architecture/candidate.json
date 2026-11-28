@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Curated Space Runtime Architecture",
+    "output": ".archify/submission-refresh-20261128-162938/runtime-architecture/curated-space-runtime.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/foxyll1919/curated-space.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "c1398927836e5429f5cf2182ef4f7df6c09ae48f"
+    }
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Web client",
+      "sublabel": "Session cookie",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        150,
+        66
+      ],
+      "sources": [
+        {
+          "path": "frontend/src/lib/api.ts",
+          "line": 115,
+          "end_line": 151
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI application",
+      "sublabel": "Session auth + /api/v1",
+      "pos": [
+        250,
+        270
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/main.py",
+          "line": 120,
+          "end_line": 153
+        },
+        {
+          "path": "backend/app/api/deps.py",
+          "line": 1,
+          "end_line": 60
+        }
+      ]
+    },
+    {
+      "id": "firewall",
+      "type": "security",
+      "label": "Image firewall",
+      "sublabel": "Bounded decode + sanitize",
+      "pos": [
+        250,
+        460
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/image_firewall.py",
+          "line": 151,
+          "end_line": 183
+        }
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "backend",
+      "label": "Background job runner",
+      "sublabel": "In-process, bounded",
+      "pos": [
+        700,
+        270
+      ],
+      "size": [
+        175,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/jobs.py",
+          "line": 32,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "type": "backend",
+      "label": "Analysis pipeline",
+      "sublabel": "Cache → extract → classify",
+      "pos": [
+        940,
+        270
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 56,
+          "end_line": 129
+        },
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 231,
+          "end_line": 255
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "type": "backend",
+      "label": "Ask agent",
+      "sublabel": "Rewrite, route, retrieve, answer",
+      "pos": [
+        700,
+        460
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/agent.py",
+          "line": 25,
+          "end_line": 122
+        }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "external",
+      "label": "Google Gemini API",
+      "sublabel": "Extract, embed, route, answer",
+      "pos": [
+        1190,
+        130
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/extraction/gemini.py",
+          "line": 144,
+          "end_line": 151
+        },
+        {
+          "path": "backend/app/services/embeddings.py",
+          "line": 51,
+          "end_line": 158
+        }
+      ]
+    },
+    {
+      "id": "classifier",
+      "type": "backend",
+      "label": "Local classifier",
+      "sublabel": "TF-IDF + LinearSVC",
+      "pos": [
+        1190,
+        270
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/classification/sklearn_svc.py",
+          "line": 136,
+          "end_line": 153
+        },
+        {
+          "path": "backend/app/services/pipeline.py",
+          "line": 231,
+          "end_line": 255
+        }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "Postgres / SQLite",
+      "sublabel": "Accounts, items, cache, usage, vectors",
+      "pos": [
+        940,
+        460
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/db/session.py",
+          "line": 24,
+          "end_line": 34
+        },
+        {
+          "path": "backend/app/db/models.py",
+          "line": 18,
+          "end_line": 73
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "label": "Supabase / local storage",
+      "sublabel": "Sanitized PNG objects",
+      "pos": [
+        490,
+        460
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/storage.py",
+          "line": 108,
+          "end_line": 116
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Curated Space backend and managed data stores",
+      "wraps": [
+        "api",
+        "firewall",
+        "jobs",
+        "pipeline",
+        "ask",
+        "classifier",
+        "sqlite",
+        "disk"
+      ],
+      "pad": 26
+    }
+  ],
+  "connections": [
+    {
+      "id": "upload",
+      "from": "browser",
+      "to": "api",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "authenticate",
+      "from": "api",
+      "to": "sqlite",
+      "label": "Verify account session"
+    },
+    {
+      "id": "sanitize",
+      "from": "api",
+      "to": "firewall",
+      "label": "Bound and sanitize bytes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "store-image",
+      "from": "api",
+      "to": "disk",
+      "label": "Write sanitized image"
+    },
+    {
+      "id": "create-record",
+      "from": "api",
+      "to": "sqlite",
+      "label": "Create pending item"
+    },
+    {
+      "id": "enqueue",
+      "from": "api",
+      "to": "jobs",
+      "label": "Schedule after 202",
+      "variant": "emphasis"
+    },
+    {
+      "id": "run-analysis",
+      "from": "jobs",
+      "to": "pipeline",
+      "label": "Analyze",
+      "variant": "emphasis"
+    },
+    {
+      "id": "read-image",
+      "from": "pipeline",
+      "to": "disk",
+      "label": "Read image for analysis"
+    },
+    {
+      "id": "provider-request",
+      "from": "pipeline",
+      "to": "gemini",
+      "label": "Send model input",
+      "variant": "emphasis"
+    },
+    {
+      "id": "provider-result",
+      "from": "gemini",
+      "to": "pipeline",
+      "label": "Validated metadata",
+      "variant": "emphasis"
+    },
+    {
+      "id": "local-prediction",
+      "from": "pipeline",
+      "to": "classifier",
+      "label": "Labels"
+    },
+    {
+      "id": "persist-result",
+      "from": "pipeline",
+      "to": "sqlite",
+      "label": "Save result + usage",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ask-request",
+      "from": "api",
+      "to": "ask",
+      "label": "Ask question + history",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ask-retrieve",
+      "from": "ask",
+      "to": "sqlite",
+      "label": "Retrieval",
+      "labelAt": [
+        815,
+        545
+      ]
+    },
+    {
+      "id": "ask-provider",
+      "from": "ask",
+      "to": "gemini",
+      "label": "Gemini calls",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Primary request path",
+      "items": [
+        "The browser authenticates with a local email/password session and posts a multipart screenshot; the API sanitizes it, stores the image and pending row, then returns 202.",
+        "An in-process bounded job runs the pipeline; the pipeline reads the image, calls Gemini, optionally predicts local labels, and persists the result."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Trust and input handling",
+      "items": [
+        "The client is outside the trusted application boundary; image size and decoded content are checked before storage.",
+        "Gemini is an external boundary: the backend holds its API key and receives only validated metadata back. Local classification stays in the runtime."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Runtime and persistence",
+      "items": [
+        "A DATABASE_URL selects Postgres for accounts, sessions, items, cache, usage and embeddings; without it the app uses local SQLite.",
+        "Supabase Storage serves when configured; otherwise sanitized PNGs stay on local disk under opaque keys.",
+        "The Ask agent rewrites follow-ups, routes retrieval and cites sources; classification is a challenger that cannot block an item from reaching ready."
+      ]
+    }
+  ]
+}
