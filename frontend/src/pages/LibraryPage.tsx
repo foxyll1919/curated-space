@@ -198,8 +198,8 @@ function EmptyLibrary() {
   return (
     <div className="flex flex-col items-start gap-3 border-t border-border py-16">
       <CompassIcon className="size-6 text-muted-foreground" aria-hidden="true" />
-      <p className="font-serif text-xl text-foreground">Nothing saved yet</p>
-      <p className="max-w-prose text-sm text-muted-foreground">
+      <p className="font-serif text-xl italic text-balance text-foreground">Nothing saved yet</p>
+      <p className="max-w-prose text-sm text-pretty text-muted-foreground">
         Drop a screenshot above, paste one straight from the clipboard, or pick files. Each one is
         stored on your own machine and given a title, a description and tags.
       </p>
@@ -211,7 +211,7 @@ function NoMatches({ filters, onClear }: { filters: Filters; onClear: () => void
   return (
     <div className="flex flex-col items-start gap-3 border-t border-border py-16">
       <SearchXIcon className="size-6 text-muted-foreground" aria-hidden="true" />
-      <p className="font-serif text-xl text-foreground">No screenshots match</p>
+      <p className="font-serif text-xl italic text-balance text-foreground">No screenshots match</p>
       <p className="max-w-prose text-sm text-muted-foreground">
         {filters.q ? (
           <>

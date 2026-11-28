@@ -62,10 +62,10 @@ export function LibraryControls({ filters, onChange, labels, resultCount }: Libr
           type="search"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Search titles, descriptions and tags"
+          placeholder="Search titles, descriptions and tags…"
           aria-label="Search the library"
           className={cn(
-            'h-9 w-full rounded-none border border-input bg-card pr-8 pl-8 text-sm',
+            'h-9 w-full rounded-none border border-input bg-card pr-8 pl-8 text-base md:text-sm',
             'placeholder:text-muted-foreground',
             'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none',
           )}
@@ -119,7 +119,7 @@ function StatusFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={cn('rounded-none', active && 'border-ring')}>
+        <Button variant="outline" className={cn('rounded-none', active && 'border-orchid')}>
           {active ? active.label : 'Any status'}
           <ChevronDownIcon data-icon="inline-end" />
         </Button>
@@ -176,14 +176,14 @@ function LabelFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={cn('rounded-none', value && 'border-ring')}>
+        <Button variant="outline" className={cn('rounded-none', value && 'border-orchid')}>
           {value ? value : 'Any label'}
           <ChevronDownIcon data-icon="inline-end" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 p-0">
         <Command>
-          <CommandInput placeholder="Find a label" className="rounded-none" />
+          <CommandInput placeholder="Find a label…" className="rounded-none" />
           <CommandList>
             <CommandGroup>
               <CommandItem onSelect={() => onChange(undefined)} className="rounded-none">

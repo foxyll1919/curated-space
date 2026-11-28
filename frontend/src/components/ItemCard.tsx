@@ -21,7 +21,7 @@ function ItemCardInner({ item }: { item: Item }) {
         'focus-visible:border-ring',
       )}
     >
-      <div className="min-h-0 flex-1 overflow-hidden bg-muted">
+      <div className="min-h-0 flex-1 overflow-hidden bg-card p-2">
         {inFlight ? (
           <div className="cs-shimmer size-full" role="status">
             <span className="sr-only">This screenshot is still being analyzed.</span>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 const STORAGE_KEY = 'curated-space-theme'
 
 /** Kept in step with --background in index.css; the browser UI is told, not asked. */
-const THEME_COLOR: Record<Theme, string> = { light: '#f2f2f1', dark: '#101112' }
+const THEME_COLOR: Record<Theme, string> = { light: '#F7F4EE', dark: '#0F0F13' }
 
 type Theme = 'light' | 'dark'
 

@@ -15,19 +15,19 @@ const STATUS_CHIP: Record<
   pending: {
     label: 'Pending',
     className: 'text-status-pending border-status-pending/30 bg-status-pending/8',
-    dot: 'bg-status-pending',
+    dot: 'bg-orchid',
     pulse: true,
   },
   processing: {
     label: 'Processing',
     className: 'text-status-pending border-status-pending/30 bg-status-pending/8',
-    dot: 'bg-status-pending',
+    dot: 'bg-orchid',
     pulse: true,
   },
   ready: {
     label: 'Analyzed',
     className: 'text-muted-foreground border-border bg-transparent',
-    dot: 'bg-foreground',
+    dot: 'bg-orchid',
     pulse: false,
   },
   deferred: {

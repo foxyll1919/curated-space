@@ -43,11 +43,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:px-8">
           <NavLink
             to="/"
-            className="flex shrink-0 items-center gap-2.5 font-serif text-[17px] leading-none text-foreground"
+            className="flex shrink-0 items-center gap-2.5 font-serif text-[17px] italic leading-none text-foreground"
           >
-            <span
+            <img
+              src="/favicon.jpg"
+              alt=""
               aria-hidden="true"
-              className="block size-4 border border-foreground bg-[linear-gradient(135deg,transparent_45%,currentColor_45%,currentColor_55%,transparent_55%)]"
+              className="size-5 rounded-full object-cover"
             />
             Curated Space
           </NavLink>
@@ -63,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={cn(
                     'rounded-none px-2 py-1 text-sm transition-colors',
                     active
-                      ? 'text-foreground underline decoration-ring decoration-2 underline-offset-[6px]'
+                      ? 'text-foreground underline decoration-orchid decoration-2 underline-offset-[6px]'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >

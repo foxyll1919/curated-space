@@ -30,8 +30,8 @@ export function SettingsPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-10">
       <header className="flex flex-col gap-2">
-        <h1 className="font-serif text-2xl text-balance sm:text-3xl">Settings</h1>
-        <p className="max-w-prose text-sm text-muted-foreground">
+        <h1 className="font-serif text-2xl italic text-balance sm:text-3xl">Settings</h1>
+        <p className="max-w-prose text-sm text-pretty text-muted-foreground">
           The account this library belongs to, and what its analysis has cost so far.
         </p>
       </header>

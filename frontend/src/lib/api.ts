@@ -136,6 +136,13 @@ export function buildItemSearchParams(query: ItemQuery): URLSearchParams {
   return params
 }
 
+export type StreamEvent =
+  | { type: 'tool_trace'; tools: string[] }
+  | { type: 'answer_chunk'; chunk: string }
+  | { type: 'sources'; sources: AskSource[]; insufficient_evidence: boolean }
+  | { type: 'error'; message: string }
+  | { type: 'done' }
+
 export const api = {
   health: () => request<Health>('/health'),
 
@@ -152,6 +159,89 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question, history }),
     }),
+
+  /**
+   * Stream an answer via SSE. Returns an AbortController so callers can cancel
+   * the in-flight request, and calls `onEvent` for each server-sent event.
+   */
+  askStream: (
+    question: string,
+    history: Array<{ role: 'user' | 'assistant'; content: string }>,
+    onEvent: (event: StreamEvent) => void,
+  ): AbortController => {
+    const controller = new AbortController()
+
+    ;(async () => {
+      let response: Response
+      try {
+        response = await fetch(`${BASE}/intelligence/agent/stream`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, history }),
+          signal: controller.signal,
+        })
+      } catch (cause) {
+        if (!controller.signal.aborted) {
+          onEvent({
+            type: 'error',
+            message:
+              cause instanceof DOMException && cause.name === 'AbortError'
+                ? 'The request was cancelled.'
+                : 'Could not reach the server.',
+          })
+        }
+        return
+      }
+
+      if (response.status === 401) {
+        window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
+      }
+      if (!response.ok || !response.body) {
+        onEvent({ type: 'error', message: 'The request could not be completed.' })
+        return
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+
+          // Parse SSE frames: each is "event: <type>\ndata: <json>\n\n"
+          const frames = buffer.split('\n\n')
+          buffer = frames.pop() ?? ''
+
+          for (const frame of frames) {
+            if (!frame.trim()) continue
+            let eventType = ''
+            let eventData = ''
+            for (const line of frame.split('\n')) {
+              if (line.startsWith('event: ')) eventType = line.slice(7)
+              else if (line.startsWith('data: ')) eventData = line.slice(6)
+            }
+            if (!eventType || !eventData) continue
+            try {
+              const parsed = JSON.parse(eventData)
+              onEvent({ type: eventType, ...parsed } as StreamEvent)
+            } catch {
+              // Malformed JSON chunk — skip
+            }
+          }
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          onEvent({ type: 'error', message: 'The stream was interrupted.' })
+        }
+      }
+    })()
+
+    return controller
+  },
 
   searchIntelligence: (q: string, mode: 'keyword' | 'semantic' | 'hybrid' = 'hybrid') =>
     request<SearchResponse>(

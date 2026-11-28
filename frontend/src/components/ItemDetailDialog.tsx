@@ -143,7 +143,7 @@ function ItemDetailBody({ id, onClose }: { id: string; onClose: () => void }) {
     <>
       <DialogContent className="max-h-[92dvh] overflow-y-auto rounded-none sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl leading-snug">
+          <DialogTitle className="font-serif text-xl italic leading-snug">
             {item.title ?? 'Untitled screenshot'}
           </DialogTitle>
 <DialogDescription className="flex flex-col gap-0.5 font-mono text-xs">
@@ -155,7 +155,7 @@ function ItemDetailBody({ id, onClose }: { id: string; onClose: () => void }) {
 
         <div className="flex flex-col gap-6 lg:flex-row">
 <div className="flex min-w-0 flex-1 justify-center">
-          <div className="flex w-fit items-start rounded-none border border-border bg-muted p-2">
+          <div className="flex w-fit items-start rounded-none border border-border bg-card p-3">
             <img
               src={api.imageUrl(item.id)}
               alt={item.title ?? 'Saved screenshot'}
@@ -295,7 +295,7 @@ function ItemDetailBody({ id, onClose }: { id: string; onClose: () => void }) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent className="rounded-none">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-lg">
+            <AlertDialogTitle className="font-serif text-lg italic">
               Delete this screenshot permanently?
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -371,7 +371,7 @@ function EditForm({
         <Input
           id="edit-tags"
           value={tags}
-          placeholder="Separate with commas, up to 8"
+          placeholder="Separate with commas, up to 8…"
           onChange={(event) => onTags(event.target.value)}
           disabled={busy}
         />

@@ -24,6 +24,11 @@ class FakeEmbeddingProvider:
         self.histories.append(history)
         return "RAG combines retrieval with grounded generation. [screenshot-one]"
 
+    def answer_stream(self, question: str, context: str, history: str = ""):
+        answer = self.answer(question, context, history)
+        for word in answer.split(" "):
+            yield word + " "
+
     def route(self, question: str) -> str:
         return "hybrid"
 
@@ -208,6 +213,9 @@ def test_gemini_failure_returns_200_with_insufficient_evidence(client):
         def answer(self, question: str, context: str, history: str = "") -> str:
             raise RuntimeError("Gemini answer failure")
 
+        def answer_stream(self, question: str, context: str, history: str = ""):
+            raise RuntimeError("Gemini answer failure")
+
         def route(self, question: str) -> str:
             raise RuntimeError("Gemini route failure")
 
@@ -319,3 +327,138 @@ def test_follow_up_question_rewriting(client):
     body = response.json()
     # Query was rewritten to "second invoice reference" which matches "second-invoice" item!
     assert any(s["id"] == "second-invoice" for s in body["sources"])
+
+
+def test_agent_stream_emits_sse_events(client):
+    import json
+
+    provider = FakeEmbeddingProvider()
+    client.app.state.embedding_provider = provider
+    _add_item(
+        client.app.state.session_factory,
+        item_id="screenshot-one",
+        owner_id="legacy-owner",
+        title="RAG architecture",
+        vector=[1.0, 0.0],
+    )
+
+    response = client.post(
+        "/api/v1/intelligence/agent/stream",
+        json={"question": "Compare RAG approaches"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
+
+    events = []
+    for line in response.text.split("\n\n"):
+        if not line.strip():
+            continue
+        parts = {}
+        for field in line.strip().split("\n"):
+            if field.startswith("event: "):
+                parts["event"] = field[7:]
+            elif field.startswith("data: "):
+                parts["data"] = json.loads(field[6:])
+        if parts:
+            events.append(parts)
+
+    event_types = [e["event"] for e in events]
+    assert "tool_trace" in event_types
+    assert "answer_chunk" in event_types
+    assert "sources" in event_types
+    assert "done" in event_types
+
+    # tool_trace comes first
+    tool_event = next(e for e in events if e["event"] == "tool_trace")
+    assert tool_event["data"]["tools"] == ["hybrid_search"]
+
+    # Sources include the matching item
+    source_event = next(e for e in events if e["event"] == "sources")
+    source_ids = [s["id"] for s in source_event["data"]["sources"]]
+    assert "screenshot-one" in source_ids
+
+    # Answer chunks reassemble into the full answer
+    chunks = [e["data"]["chunk"] for e in events if e["event"] == "answer_chunk"]
+    full_answer = "".join(chunks)
+    assert "[screenshot-one]" in full_answer
+
+
+def test_agent_stream_error_on_provider_failure(client):
+    import json
+
+    class CrashingStreamProvider:
+        model = "crashing-model"
+        is_configured = True
+
+        def embed_text(self, text: str) -> list[float]:
+            raise RuntimeError("Gemini embed failure")
+
+        def answer(self, question: str, context: str, history: str = "") -> str:
+            raise RuntimeError("Gemini answer failure")
+
+        def answer_stream(self, question: str, context: str, history: str = ""):
+            raise RuntimeError("Gemini answer failure")
+
+        def route(self, question: str) -> str:
+            raise RuntimeError("Gemini route failure")
+
+        def rewrite_query(self, question: str, history: str = "") -> str:
+            raise RuntimeError("Gemini rewrite failure")
+
+    client.app.state.embedding_provider = CrashingStreamProvider()
+
+    response = client.post(
+        "/api/v1/intelligence/agent/stream",
+        json={"question": "anything"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+
+    events = []
+    for line in response.text.split("\n\n"):
+        if not line.strip():
+            continue
+        parts = {}
+        for field in line.strip().split("\n"):
+            if field.startswith("event: "):
+                parts["event"] = field[7:]
+            elif field.startswith("data: "):
+                parts["data"] = json.loads(field[6:])
+        if parts:
+            events.append(parts)
+
+    error_events = [e for e in events if e["event"] == "error"]
+    assert len(error_events) >= 1
+    assert "could not reach the answer service" in error_events[0]["data"]["message"]
+
+
+def test_agent_stream_no_results(client):
+    import json
+
+    provider = FakeEmbeddingProvider()
+    client.app.state.embedding_provider = provider
+
+    response = client.post(
+        "/api/v1/intelligence/agent/stream",
+        json={"question": "What about quantum computing?"},
+        headers={"X-API-Key": "test-api-key"},
+    )
+    assert response.status_code == 200
+
+    events = []
+    for line in response.text.split("\n\n"):
+        if not line.strip():
+            continue
+        parts = {}
+        for field in line.strip().split("\n"):
+            if field.startswith("event: "):
+                parts["event"] = field[7:]
+            elif field.startswith("data: "):
+                parts["data"] = json.loads(field[6:])
+        if parts:
+            events.append(parts)
+
+    source_event = next(e for e in events if e["event"] == "sources")
+    assert source_event["data"]["sources"] == []
+    assert source_event["data"]["insufficient_evidence"] is True

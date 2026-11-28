@@ -3,47 +3,47 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Curated Space is an archival contact sheet. The chrome is deliberately
-  achromatic so that saved screenshots carry every bit of colour on screen.
-  Cobalt is the only interactive accent; status is the only other place a
-  colour appears, and it is always paired with a text label so colour is
-  never the sole carrier of meaning.
+  The Library — a personal archival library. Day mode is warm paper with
+  indigo text and orchid accents. Night mode is graphite with soft white
+  text and brightened orchid accents.
 */
 :root {
   --radius: 0.375rem;
 
-  /* Scrollbars, form controls and the caret follow the chosen theme, not the OS. */
   color-scheme: light;
 
-  /* Paper and ink */
-  --background: #f2f2f1;
-  --foreground: #17181a;
-  --card: #fafaf9;
-  --card-foreground: #17181a;
-  --popover: #fafaf9;
-  --popover-foreground: #17181a;
+  /* Warm paper and indigo ink */
+  --background: #F7F4EE;
+  --foreground: #2F3061;
+  --card: #FFFFFF;
+  --card-foreground: #2F3061;
+  --popover: #FFFFFF;
+  --popover-foreground: #2F3061;
 
   /* Chrome */
-  --secondary: #e8e8e6;
-  --secondary-foreground: #2b2c2f;
-  --muted: #e9e9e7;
-  --muted-foreground: #63656a;
-  --accent: #e6e6e3;
-  --accent-foreground: #17181a;
+  --secondary: #EDE9E0;
+  --secondary-foreground: #2F3061;
+  --muted: #EDE9E0;
+  --muted-foreground: #6B6B8D;
+  --accent: #E8E4DB;
+  --accent-foreground: #2F3061;
 
-  /* Interactive: the single accent. Ink buttons, cobalt focus. */
-  --primary: #17181a;
-  --primary-foreground: #f7f7f6;
-  --ring: #3e63dd;
+  /* Interactive: solid indigo buttons */
+  --primary: #2F3061;
+  --primary-foreground: #FFFFFF;
+  --ring: #2F3061;
 
   --destructive: #c43b2e;
   --destructive-foreground: #fdf7f6;
 
-  /* A hairline, not a card border. */
-  --border: #dcdcd8;
-  --input: #cfcfca;
+  /* Borders */
+  --border: #D8D3C8;
+  --input: #CCC7BC;
 
-  /* Semantic status, consumed by components/StatusChip. Never a percentage. */
+  /* Orchid accent — used sparingly for active-tab underline, tag dots, star */
+  --orchid: #C77DBA;
+
+  /* Semantic status */
   --status-failed: #b33125;
   --status-deferred: #4f6187;
   --status-pending: #6c6e72;
@@ -52,29 +52,34 @@
 .dark {
   color-scheme: dark;
 
-  --background: #101112;
-  --foreground: #ecedee;
-  --card: #17181a;
-  --card-foreground: #ecedee;
-  --popover: #17181a;
-  --popover-foreground: #ecedee;
+  /* Graphite surfaces */
+  --background: #0F0F13;
+  --foreground: #E0E0E6;
+  --card: #17171C;
+  --card-foreground: #E0E0E6;
+  --popover: #17171C;
+  --popover-foreground: #E0E0E6;
 
-  --secondary: #232528;
-  --secondary-foreground: #dfe0e2;
-  --muted: #1e2022;
-  --muted-foreground: #93969b;
-  --accent: #26282b;
-  --accent-foreground: #ecedee;
+  --secondary: #1F1F26;
+  --secondary-foreground: #E0E0E6;
+  --muted: #1F1F26;
+  --muted-foreground: #9393A6;
+  --accent: #1F1F26;
+  --accent-foreground: #E0E0E6;
 
-  --primary: #ecedee;
-  --primary-foreground: #141517;
-  --ring: #7b95f2;
+  /* Soft white button */
+  --primary: #E0E0E6;
+  --primary-foreground: #0F0F13;
+  --ring: #E0E0E6;
 
   --destructive: #e06a5d;
   --destructive-foreground: #1a0f0e;
 
-  --border: #2a2c30;
-  --input: #35383c;
+  --border: #2A2A33;
+  --input: #35353F;
+
+  /* Orchid brightens in dark mode */
+  --orchid: #E58CF0;
 
   --status-failed: #e8897c;
   --status-deferred: #93a5c9;
@@ -101,19 +106,20 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-orchid: var(--orchid);
 
   --color-status-failed: var(--status-failed);
   --color-status-deferred: var(--status-deferred);
   --color-status-pending: var(--status-pending);
 
   /*
-    One family for the machinery (chrome, controls, metadata) and one for the
-    content. Titles are the only serif, because a title is something a person
-    reads, not something the app operates with.
+    Instrument Serif for the wordmark, headings and card titles.
+    Inter for interface text.
+    Space Mono for numbering labels and metadata.
   */
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
 
   /* 4px base register. */
   --spacing: 0.25rem;
@@ -131,15 +137,14 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'cv05', 'ss01';
+    text-underline-position: from-font;
+    text-decoration-skip-ink: auto;
   }
 
-  /* Focus is the accent, and it is always visible. */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
 
-  /* Taps on controls should not wait out the double-tap delay, and the tap
-     flash is a duplicate of the hover and focus states already designed here. */
   button,
   a,
   label,
@@ -152,11 +157,6 @@
   }
 }
 
-/*
-  Rubber-banding is wanted on touch (pull to refresh) and not wanted on a mouse,
-  where it just makes the page feel loose. `pointer: fine` is the primary input,
-  so hybrid machines keep their native behaviour until a finger is actually used.
-*/
 @media (pointer: fine) {
   html {
     overscroll-behavior: none;
@@ -164,7 +164,6 @@
 }
 
 @layer components {
-  /* Pending and processing items show a slow sweep, not a spinner. */
   .cs-shimmer {
     background-image: linear-gradient(
       100deg,

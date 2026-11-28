@@ -104,18 +104,20 @@ export function LoginPage() {
 
       <main className="flex flex-1 items-center justify-center px-4 pb-16 sm:px-6">
         <div className="w-full max-w-sm">
-          <div className="flex items-center gap-2.5 font-serif text-[17px] leading-none text-foreground">
-            <span
+          <div className="flex items-center gap-2.5 font-serif text-[17px] italic leading-none text-foreground">
+            <img
+              src="/favicon.jpg"
+              alt=""
               aria-hidden="true"
-              className="block size-4 border border-foreground bg-[linear-gradient(135deg,transparent_45%,currentColor_45%,currentColor_55%,transparent_55%)]"
+              className="size-5 rounded-full object-cover"
             />
             Curated Space
           </div>
 
-          <h1 className="mt-8 font-serif text-3xl leading-tight tracking-tight">
+          <h1 className="mt-8 font-serif text-3xl italic text-balance leading-tight tracking-tight">
             {isCreate ? 'Create your account' : 'Sign in'}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-pretty text-muted-foreground">
             {isCreate
               ? 'This library is private. One account owns the screenshots, and nothing leaves your machine without it.'
               : 'Your screenshot library is waiting.'}
@@ -215,7 +217,7 @@ export function LoginPage() {
                       setChoice('sign-in')
                       setError(null)
                     }}
-                    className="text-foreground underline decoration-ring decoration-2 underline-offset-4"
+                    className="text-foreground underline decoration-orchid decoration-2 underline-offset-4"
                   >
                     Sign in
                   </button>
@@ -229,7 +231,7 @@ export function LoginPage() {
                       setChoice('create')
                       setError(null)
                     }}
-                    className="text-foreground underline decoration-ring decoration-2 underline-offset-4"
+                    className="text-foreground underline decoration-orchid decoration-2 underline-offset-4"
                   >
                     Create an account
                   </button>

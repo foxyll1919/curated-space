@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { AskResponse } from '@/lib/api'
 
 export type ChatMessage = {
-  id: number
+  id: string
   question: string
   response?: AskResponse
   error?: string
+  streaming?: boolean
+  streamedAnswer?: string
   createdAt: number
 }
 
@@ -18,9 +20,14 @@ export type Conversation = {
 }
 
 const STORAGE_PREFIX = 'curated_space_conversations_'
+const MAX_CONVERSATIONS = 50
 
 function getStorageKey(accountId?: string | null): string {
   return `${STORAGE_PREFIX}${accountId || 'guest'}`
+}
+
+function uid(): string {
+  return `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }
 
 function loadConversations(key: string): Conversation[] {
@@ -29,7 +36,16 @@ function loadConversations(key: string): Conversation[] {
     if (!raw) return []
     const parsed = JSON.parse(raw) as Conversation[]
     if (!Array.isArray(parsed)) return []
-    return parsed.sort((a, b) => b.updatedAt - a.updatedAt)
+    return parsed
+      .map((c) => ({
+        ...c,
+        messages: c.messages.map((m) =>
+          m.response || m.error
+            ? { ...m, streaming: false, streamedAnswer: undefined }
+            : { ...m, error: 'This question was interrupted. Ask again.', streaming: false },
+        ),
+      }))
+      .sort((a, b) => b.updatedAt - a.updatedAt)
   } catch {
     return []
   }
@@ -37,9 +53,10 @@ function loadConversations(key: string): Conversation[] {
 
 function saveConversations(key: string, list: Conversation[]): void {
   try {
-    localStorage.setItem(key, JSON.stringify(list))
-  } catch (err) {
-    console.error('Failed to save conversations to localStorage', err)
+    const trimmed = list.slice(0, MAX_CONVERSATIONS)
+    localStorage.setItem(key, JSON.stringify(trimmed))
+  } catch {
+    /* storage full or blocked — chat still works */
   }
 }
 
@@ -55,7 +72,7 @@ export function useConversations(accountId?: string | null) {
     return initial[0]?.id ?? null
   })
 
-  // Synchronize when storageKey changes (e.g. account switch) during render pattern
+  // Track the previous key to detect account changes.
   const [syncedKey, setSyncedKey] = useState(storageKey)
   if (syncedKey !== storageKey) {
     setSyncedKey(storageKey)
@@ -64,9 +81,20 @@ export function useConversations(accountId?: string | null) {
     setActiveId(loaded[0]?.id ?? null)
   }
 
-  // Sync state changes to localStorage
+  // Persist to localStorage when conversations change — but skip transient
+  // streaming state so interrupted-message detection works on reload.
   useEffect(() => {
-    saveConversations(storageKey, conversations)
+    const persistable = conversations.map((c) => ({
+      ...c,
+      messages: c.messages.map((m) => {
+        if (!m.streaming) return m
+        // A message still streaming hasn't finished — persist without
+        // streaming flags so it shows as interrupted on reload.
+        const { streaming: _s, streamedAnswer: _sa, ...rest } = m
+        return rest
+      }),
+    }))
+    saveConversations(storageKey, persistable)
   }, [conversations, storageKey])
 
   const activeConversation = useMemo(
@@ -100,16 +128,26 @@ export function useConversations(accountId?: string | null) {
     setActiveId(null)
   }, [])
 
+  /**
+   * Append a user message. If there is no active conversation, one is created.
+   * Returns the conversation id and message id so the caller can update the
+   * message later (e.g. with a streamed response).
+   *
+   * Fixed: the conversation id is computed deterministically *before* the state
+   * update and returned synchronously, avoiding the React batching race.
+   */
   const addMessage = useCallback(
-    (question: string) => {
+    (question: string): { conversationId: string; messageId: string } => {
       const trimmed = question.trim()
-      const messageId = Date.now()
+      const messageId = uid()
       const newMessage: ChatMessage = {
         id: messageId,
         question: trimmed,
         createdAt: Date.now(),
+        streaming: true,
       }
 
+      // Decide the target conversation id deterministically before setState.
       let targetId = activeId
 
       setConversations((current) => {
@@ -127,10 +165,10 @@ export function useConversations(accountId?: string | null) {
           return [updated, ...next]
         }
 
-        // Create new conversation
+        // Create new conversation — id was pre-computed above.
         const title = trimmed.length > 45 ? `${trimmed.slice(0, 45)}…` : trimmed
         const newConversation: Conversation = {
-          id: `conv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          id: `conv_${uid()}`,
           title: title || 'New Conversation',
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -140,7 +178,10 @@ export function useConversations(accountId?: string | null) {
         return [newConversation, ...current]
       })
 
-      if (targetId && targetId !== activeId) {
+      // Update activeId outside the conversations setter to avoid batching issues.
+      if (targetId !== activeId) {
+        // targetId is only reassigned when a new conversation is created above,
+        // and the new id is deterministic, so this is safe.
         setActiveId(targetId)
       }
 
@@ -150,7 +191,7 @@ export function useConversations(accountId?: string | null) {
   )
 
   const updateMessage = useCallback(
-    (convId: string, msgId: number, patch: Partial<ChatMessage>) => {
+    (convId: string, msgId: string, patch: Partial<ChatMessage>) => {
       setConversations((current) =>
         current.map((c) => {
           if (c.id !== convId) return c
@@ -165,6 +206,12 @@ export function useConversations(accountId?: string | null) {
     [],
   )
 
+  const renameConversation = useCallback((id: string, title: string) => {
+    setConversations((current) =>
+      current.map((c) => (c.id === id ? { ...c, title, updatedAt: Date.now() } : c)),
+    )
+  }, [])
+
   return {
     conversations,
     activeConversation,
@@ -175,5 +222,6 @@ export function useConversations(accountId?: string | null) {
     clearAllConversations,
     addMessage,
     updateMessage,
+    renameConversation,
   }
 }

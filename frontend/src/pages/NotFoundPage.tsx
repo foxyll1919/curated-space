@@ -10,7 +10,7 @@ export function NotFoundPage() {
           <EmptyMedia variant="default" className="text-muted-foreground">
             404
           </EmptyMedia>
-          <EmptyTitle className="font-serif text-2xl">That page is not in this library</EmptyTitle>
+          <EmptyTitle className="font-serif text-2xl italic">That page is not in this library</EmptyTitle>
           <EmptyDescription>
             The link may be from an older version, or it may point at a screenshot that has been
             deleted.

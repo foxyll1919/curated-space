@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
@@ -13,7 +15,7 @@ from app.api.deps import OwnerDep, SessionDep, get_embedding_provider
 from app.db.models import Item, ItemEmbedding
 from app.services.embeddings import EmbeddingProvider, embedding_text, text_hash
 from app.services.retrieval import hybrid_search, keyword_search, semantic_search
-from app.services.agent import run_agent
+from app.services.agent import run_agent, run_agent_stream
 
 logger = logging.getLogger(__name__)
 
@@ -268,3 +270,37 @@ def agent(
             tool_trace=[],
             insufficient_evidence=True,
         )
+
+
+@router.post("/agent/stream")
+def agent_stream(
+    body: AskRequest,
+    session: SessionDep,
+    owner_id: OwnerDep,
+    provider: Annotated[EmbeddingProvider, Depends(get_embedding_provider)],
+) -> StreamingResponse:
+    history = _history_text(body.history)
+
+    def generate():
+        try:
+            for event_type, data in run_agent_stream(
+                session=session,
+                owner_id=owner_id,
+                provider=provider,
+                question=body.question,
+                history=history,
+            ):
+                yield f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
+        except Exception:
+            logger.exception("Agent stream processing failed")
+            yield f"event: error\ndata: {json.dumps({'message': 'I could not reach the answer service just now. Please try again.'})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
