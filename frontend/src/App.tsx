@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppShell } from '@/components/AppShell'
+import { LandingPage } from '@/pages/LandingPage'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { ItemPage } from '@/pages/ItemPage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -46,7 +47,7 @@ function RequireAccount() {
   }
 
   if (account === null) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />
+    return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
   }
 
   return (
@@ -63,7 +64,25 @@ function RedirectIfSignedIn() {
   return <LoginPage />
 }
 
+/** Shows the landing page to visitors, redirects signed-in users to the library. */
+function LandingGate() {
+  const { isLoading, account } = useAuth()
+  if (isLoading) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <span className="text-sm text-muted-foreground">Loading…</span>
+      </div>
+    )
+  }
+  if (account) return <Navigate to="/" replace />
+  return <LandingPage />
+}
+
 const router = createBrowserRouter([
+  {
+    path: '/welcome',
+    element: <LandingGate />,
+  },
   {
     path: '/login',
     element: <RedirectIfSignedIn />,
@@ -75,8 +94,6 @@ const router = createBrowserRouter([
       { index: true, element: <LibraryPage /> },
       { path: 'ask', element: <AskPage /> },
       { path: 'settings', element: <SettingsPage /> },
-      // Usage is now a section of settings, so old links land on the section
-      // that replaced it instead of a dead end.
       { path: 'usage', element: <Navigate to="/settings" replace /> },
       { path: 'item/:id', element: <ItemPage /> },
       { path: '*', element: <NotFoundPage /> },

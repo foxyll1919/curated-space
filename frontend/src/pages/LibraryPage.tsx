@@ -201,7 +201,7 @@ function EmptyLibrary() {
       <p className="font-serif text-xl italic text-balance text-foreground">Nothing saved yet</p>
       <p className="max-w-prose text-sm text-pretty text-muted-foreground">
         Drop a screenshot above, paste one straight from the clipboard, or pick files. Each one is
-        stored on your own machine and given a title, a description and tags.
+        stored in your library and given a title, a description and tags.
       </p>
     </div>
   )

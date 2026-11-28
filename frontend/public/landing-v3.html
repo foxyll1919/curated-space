@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#F7F4EE" id="theme-color" />
+  <title>Curated Space — The Card Catalogue</title>
+  <meta name="description" content="A personal screenshot library. Drop screenshots, let AI extract knowledge, search everything you've saved. Powered by Gemini." />
+  <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Tokens ────────────────────────────────────────── */
+    :root {
+      --bg: #F7F4EE;
+      --fg: #2F3061;
+      --card: #FFFFFF;
+      --orchid: #C77DBA;
+      --border: #D8D3C8;
+      --muted: #6B6B8D;
+      --secondary: #EDE9E0;
+      --surface: #FFFFFF;
+      --brass: #B8A47C;
+      --brass-light: #D4C5A0;
+      --ruled-line: #C8D4E8;
+      --card-bg: #FFFEF8;
+      --hole-shadow: #D0C8B8;
+
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+
+      color-scheme: light;
+    }
+
+    .dark {
+      --bg: #0F0F13;
+      --fg: #E0E0E6;
+      --card: #17171C;
+      --orchid: #E58CF0;
+      --border: #2A2A33;
+      --muted: #9393A6;
+      --secondary: #1F1F26;
+      --surface: #1F1F26;
+      --brass: #8B7D5E;
+      --brass-light: #6B6048;
+      --ruled-line: #2A2A40;
+      --card-bg: #1A1A22;
+      --hole-shadow: #0A0A10;
+
+      color-scheme: dark;
+    }
+
+    /* ── Base ──────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* ── Reduced motion ───────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ── Theme toggle ─────────────────────────────────── */
+    .theme-toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 100;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: background 0.3s, border-color 0.3s, transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .theme-toggle:hover { transform: scale(1.08); }
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 2px;
+    }
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon { pointer-events: none; }
+    .dark .theme-toggle .icon-sun { display: none; }
+    :not(.dark) .theme-toggle .icon-moon { display: none; }
+
+    /* ── Timeline (left vertical line) ────────────────── */
+    .timeline {
+      position: fixed;
+      left: 2rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 100%;
+      background: var(--border);
+      opacity: 0.4;
+    }
+    .timeline-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 0%;
+      background: var(--orchid);
+      transition: height 0.15s linear;
+      opacity: 0.7;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      transition: background 0.4s, border-color 0.4s;
+    }
+    .timeline-dot.active {
+      background: var(--orchid);
+      border-color: var(--orchid);
+    }
+    @media (max-width: 768px) {
+      .timeline { display: none; }
+    }
+
+    /* ── Guide tooltip ────────────────────────────────── */
+    .guide-tooltip {
+      position: fixed;
+      top: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      opacity: 1;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      pointer-events: none;
+    }
+    .guide-tooltip.hidden {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    .guide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orchid);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* ── Scroll-reveal ────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Exhibition Header ────────────────────────────── */
+    .exhibition-header {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+    .exhibit-number {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .exhibit-favicon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .exhibit-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      text-wrap: balance;
+      margin-bottom: 1.25rem;
+    }
+    .exhibit-rule {
+      width: min(280px, 60%);
+      height: 1px;
+      background: var(--border);
+      border: none;
+      margin: 0 auto 1.5rem;
+    }
+    .exhibit-subtitle {
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--muted);
+      max-width: 400px;
+      text-wrap: pretty;
+      margin-bottom: 2.5rem;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #FFFFFF;
+      background: var(--fg);
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.75rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+      text-decoration: none;
+    }
+    .dark .btn-primary {
+      background: #E0E0E6;
+      color: #0F0F13;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(47, 48, 97, 0.18);
+    }
+    .dark .btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(224, 224, 230, 0.12);
+    }
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 2px;
+    }
+
+    /* ── Section wrapper ──────────────────────────────── */
+    .section {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .section { padding: 4rem 1.25rem; }
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    /* ── Index Cards ──────────────────────────────────── */
+    .index-cards {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0;
+      position: relative;
+      padding: 3rem 0 2rem;
+    }
+    .index-card-wrapper {
+      perspective: 800px;
+      flex-shrink: 0;
+    }
+    .index-card-wrapper:nth-child(1) {
+      transform: rotate(-3deg) translateY(8px);
+      z-index: 1;
+      margin-right: -24px;
+    }
+    .index-card-wrapper:nth-child(2) {
+      transform: rotate(0deg);
+      z-index: 2;
+    }
+    .index-card-wrapper:nth-child(3) {
+      transform: rotate(2.5deg) translateY(12px);
+      z-index: 1;
+      margin-left: -24px;
+    }
+    .index-card-inner {
+      width: 280px;
+      height: 380px;
+      position: relative;
+      transition: transform 0.6s ease;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .index-card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .index-card-inner:hover {
+      transform: translateY(-4px);
+    }
+    .index-card-inner.flipped:hover {
+      transform: rotateY(180deg) translateY(-4px);
+    }
+    .index-card-front,
+    .index-card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .index-card-front {
+      background: var(--card-bg);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+      background-image: repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        var(--ruled-line) 27px,
+        var(--ruled-line) 28px
+      );
+      background-position: 0 100px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .index-card-back {
+      background: var(--card-bg);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* Card hole */
+    .card-hole {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      margin: 14px auto 0;
+      box-shadow: inset 0 1px 3px var(--hole-shadow);
+      flex-shrink: 0;
+    }
+
+    /* Red/orchid line */
+    .card-accent-line {
+      width: calc(100% - 2.5rem);
+      height: 2px;
+      background: var(--orchid);
+      margin: 12px auto 0;
+      border-radius: 1px;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      padding: 1.25rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-number {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .card-heading {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.5rem;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      color: var(--fg);
+    }
+    .card-desc {
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+    .card-flip-hint {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      opacity: 0.5;
+      margin-top: auto;
+      text-align: right;
+    }
+
+    /* ── Card Backs ───────────────────────────────────── */
+    /* Card 1 back: drop zone */
+    .back-dropzone {
+      width: 120px;
+      height: 100px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .back-dropzone-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1;
+    }
+    .back-dropzone-text {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* Card 2 back: shimmer */
+    .back-shimmer {
+      width: 140px;
+      height: 80px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer-move 2s ease-in-out infinite;
+    }
+    @keyframes shimmer-move {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .back-shimmer-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      width: 140px;
+    }
+    .back-shimmer-line {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer-move 2s ease-in-out infinite;
+    }
+    .back-shimmer-line:nth-child(2) { width: 80%; animation-delay: 0.2s; }
+    .back-shimmer-line:nth-child(3) { width: 55%; animation-delay: 0.4s; }
+
+    /* Card 3 back: search bar */
+    .back-search {
+      width: 160px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 8px;
+    }
+    .back-search-icon {
+      font-size: 0.85rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .back-search-cursor {
+      width: 1.5px;
+      height: 16px;
+      background: var(--orchid);
+      animation: blink-cursor 1s step-end infinite;
+    }
+    @keyframes blink-cursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .back-search-results {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 160px;
+    }
+    .back-search-result {
+      height: 24px;
+      border-radius: 4px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+    }
+
+    .back-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    /* Mobile stacking */
+    @media (max-width: 768px) {
+      .index-cards {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .index-card-wrapper:nth-child(1),
+      .index-card-wrapper:nth-child(2),
+      .index-card-wrapper:nth-child(3) {
+        transform: none;
+        margin: 0;
+        z-index: 1;
+      }
+      .index-card-inner {
+        width: min(280px, 85vw);
+        height: 360px;
+      }
+    }
+
+    /* ── Museum Labels ────────────────────────────────── */
+    .museum-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+    .museum-label {
+      max-width: 520px;
+      padding-left: 1.5rem;
+      border-left: 2px solid var(--border);
+      transition: transform 0.3s ease;
+    }
+    .museum-label:hover {
+      transform: scale(1.02);
+    }
+    .museum-label:nth-child(even) {
+      margin-left: auto;
+    }
+    .museum-label-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.6rem;
+      line-height: 1.25;
+      margin-bottom: 0.6rem;
+      text-wrap: balance;
+    }
+    .museum-label-desc {
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-wrap: pretty;
+    }
+    .museum-label-medium {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    @media (max-width: 768px) {
+      .museum-label:nth-child(even) { margin-left: 0; }
+      .museum-label { max-width: 100%; }
+    }
+
+    /* ── Visitor Book / CTA ───────────────────────────── */
+    .visitor-book {
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .visitor-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .visitor-ornament-line {
+      width: 40px;
+      height: 1px;
+      background: var(--border);
+    }
+    .visitor-ornament-diamond {
+      width: 8px;
+      height: 8px;
+      background: var(--orchid);
+      transform: rotate(45deg);
+      opacity: 0.6;
+    }
+    .visitor-heading {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      line-height: 1.2;
+      text-wrap: balance;
+      margin-bottom: 1rem;
+    }
+    .visitor-subtext {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      text-wrap: pretty;
+    }
+    .visitor-fine {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      opacity: 0.6;
+      margin-top: 1.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .footer-favicon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer-link {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-link:hover {
+      color: var(--fg);
+    }
+    .footer-link:focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 2px;
+    }
+    .footer-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .footer-ai-notice {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--muted);
+      opacity: 0.7;
+      max-width: 440px;
+      text-wrap: pretty;
+    }
+
+    /* ── Stagger children on reveal ───────────────────── */
+    .stagger-children > .reveal:nth-child(1) { transition-delay: 0ms; }
+    .stagger-children > .reveal:nth-child(2) { transition-delay: 300ms; }
+    .stagger-children > .reveal:nth-child(3) { transition-delay: 600ms; }
+  </style>
+</head>
+<body>
+  <!-- Theme toggle -->
+  <button class="theme-toggle" aria-label="Toggle dark mode" type="button">
+    <span class="icon-sun" aria-hidden="true">☀</span>
+    <span class="icon-moon" aria-hidden="true">☽</span>
+  </button>
+
+  <!-- Timeline -->
+  <nav class="timeline" aria-hidden="true">
+    <div class="timeline-fill"></div>
+    <div class="timeline-dot" data-section="0" style="top: 12%"></div>
+    <div class="timeline-dot" data-section="1" style="top: 35%"></div>
+    <div class="timeline-dot" data-section="2" style="top: 58%"></div>
+    <div class="timeline-dot" data-section="3" style="top: 80%"></div>
+  </nav>
+
+  <!-- Guide tooltip -->
+  <div class="guide-tooltip" role="status" aria-live="polite">
+    <span class="guide-dot"></span>
+    Welcome to the exhibition. Scroll to explore.
+  </div>
+
+  <!-- ═══ EXHIBITION HEADER ═══ -->
+  <header class="exhibition-header" data-section-index="0">
+    <span class="exhibit-number reveal">NO. 001 — EST. 2026</span>
+    <img src="/favicon.jpg" alt="Curated Space" class="exhibit-favicon reveal" />
+    <h1 class="exhibit-title reveal">Curated Space</h1>
+    <hr class="exhibit-rule reveal" />
+    <p class="exhibit-subtitle reveal">A personal library for your visual references.</p>
+    <a href="/login" class="btn-primary reveal">Enter the library →</a>
+  </header>
+
+  <!-- ═══ INDEX CARDS ═══ -->
+  <section class="section" data-section-index="1" aria-label="How it works">
+    <p class="section-label reveal">HOW IT WORKS</p>
+    <div class="index-cards stagger-children">
+
+      <!-- Card 1 -->
+      <div class="index-card-wrapper reveal">
+        <div class="index-card-inner" role="button" tabindex="0" aria-label="Drop it in — click to see illustration">
+          <div class="index-card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent-line"></div>
+            <div class="card-content">
+              <span class="card-number">001</span>
+              <h3 class="card-heading">Drop it in</h3>
+              <p class="card-desc">Screenshots arrive by drop, paste, or file pick. Each one is stored and catalogued.</p>
+              <span class="card-flip-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="index-card-back" aria-hidden="true">
+            <div class="back-dropzone">
+              <div class="back-dropzone-icon">↓</div>
+              <span class="back-dropzone-text">DROP HERE</span>
+            </div>
+            <span class="back-label">DRAG & DROP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="index-card-wrapper reveal">
+        <div class="index-card-inner" role="button" tabindex="0" aria-label="AI catalogues it — click to see illustration">
+          <div class="index-card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent-line"></div>
+            <div class="card-content">
+              <span class="card-number">002</span>
+              <h3 class="card-heading">AI catalogues it</h3>
+              <p class="card-desc">Gemini reads your screenshot and writes a title, description, and tags.</p>
+              <span class="card-flip-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="index-card-back" aria-hidden="true">
+            <div class="back-shimmer"></div>
+            <div class="back-shimmer-lines">
+              <div class="back-shimmer-line"></div>
+              <div class="back-shimmer-line"></div>
+              <div class="back-shimmer-line"></div>
+            </div>
+            <span class="back-label">EXTRACTING…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="index-card-wrapper reveal">
+        <div class="index-card-inner" role="button" tabindex="0" aria-label="Find it again — click to see illustration">
+          <div class="index-card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent-line"></div>
+            <div class="card-content">
+              <span class="card-number">003</span>
+              <h3 class="card-heading">Find it again</h3>
+              <p class="card-desc">Full-text search, semantic search, or just ask a question in plain English.</p>
+              <span class="card-flip-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="index-card-back" aria-hidden="true">
+            <div class="back-search">
+              <span class="back-search-icon">⌕</span>
+              <div class="back-search-cursor"></div>
+            </div>
+            <div class="back-search-results">
+              <div class="back-search-result"></div>
+              <div class="back-search-result"></div>
+              <div class="back-search-result"></div>
+            </div>
+            <span class="back-label">SEARCH</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ MUSEUM LABELS ═══ -->
+  <section class="section" data-section-index="2" aria-label="Features">
+    <p class="section-label reveal">THE COLLECTION</p>
+    <div class="museum-labels">
+
+      <article class="museum-label reveal">
+        <h3 class="museum-label-name">Your Personal Archive</h3>
+        <p class="museum-label-desc">Every screenshot is securely stored in your account. Only you can see, search, and manage your collection.</p>
+        <span class="museum-label-medium">Medium: Encrypted sessions &amp; per-account isolation</span>
+      </article>
+
+      <article class="museum-label reveal">
+        <h3 class="museum-label-name">The Ask Room</h3>
+        <p class="museum-label-desc">Ask your library questions in plain English. Answers cite the original screenshots.</p>
+        <span class="museum-label-medium">Medium: Retrieval-augmented generation</span>
+      </article>
+
+      <article class="museum-label reveal">
+        <h3 class="museum-label-name">The Catalogue</h3>
+        <p class="museum-label-desc">Every screenshot is titled, described, and tagged automatically. Corrections are yours to make.</p>
+        <span class="museum-label-medium">Medium: Structured metadata extraction</span>
+      </article>
+
+      <article class="museum-label reveal">
+        <h3 class="museum-label-name">Responsible AI</h3>
+        <p class="museum-label-desc">Screenshots are sent to Google Gemini only for analysis — never for training. You can skip analysis entirely for sensitive screenshots. The AI extracts metadata; it does not store, share, or learn from your images.</p>
+        <span class="museum-label-medium">Medium: Gemini API with paid-tier data isolation</span>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ VISITOR BOOK / CTA ═══ -->
+  <section class="visitor-book" id="visitor-book" data-section-index="3" aria-label="Get started">
+    <div class="visitor-ornament reveal">
+      <div class="visitor-ornament-line"></div>
+      <div class="visitor-ornament-diamond"></div>
+      <div class="visitor-ornament-line"></div>
+    </div>
+    <h2 class="visitor-heading reveal">Sign the visitor book to begin your collection.</h2>
+    <p class="visitor-subtext reveal">Every screenshot you save becomes a permanent entry in your personal archive.</p>
+    <a href="/login" class="btn-primary reveal">Create your account →</a>
+    <p class="visitor-fine reveal">Free to use. No credit card required.</p>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="/favicon.jpg" alt="" class="footer-favicon" />
+        <span class="footer-text">© 2026 Curated Space</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/foxyll1919/curated-space" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="footer-dot" aria-hidden="true"></span>
+        <a href="/login" class="footer-link">Sign in</a>
+        <span class="footer-dot" aria-hidden="true"></span>
+        <a href="#visitor-book" class="footer-link">Create account</a>
+      </div>
+      <p class="footer-ai-notice">
+        Screenshots are analyzed by Google Gemini to extract metadata.
+        Sensitive screenshots can be saved without AI analysis.
+        See Google's <a href="https://ai.google.dev/gemini-api/terms" class="footer-link" style="display:inline;letter-spacing:0;" target="_blank" rel="noopener noreferrer">Gemini API terms</a> for data handling details.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── Theme ──────────────────────────────────────── */
+      const html = document.documentElement;
+      const themeBtn = document.querySelector('.theme-toggle');
+      const metaThemeColor = document.getElementById('theme-color');
+
+      function applyTheme(dark) {
+        html.classList.toggle('dark', dark);
+        metaThemeColor.content = dark ? '#0F0F13' : '#F7F4EE';
+        try { localStorage.setItem('cs-theme', dark ? 'dark' : 'light'); } catch(e) {}
+      }
+
+      // Init
+      (function initTheme() {
+        var stored;
+        try { stored = localStorage.getItem('cs-theme'); } catch(e) {}
+        if (stored === 'dark') return applyTheme(true);
+        if (stored === 'light') return applyTheme(false);
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      })();
+
+      themeBtn.addEventListener('click', function () {
+        applyTheme(!html.classList.contains('dark'));
+      });
+
+      /* ── Guide tooltip ──────────────────────────────── */
+      var guide = document.querySelector('.guide-tooltip');
+      var scrolledOnce = false;
+      function dismissGuide() {
+        if (scrolledOnce) return;
+        scrolledOnce = true;
+        guide.classList.add('hidden');
+        window.removeEventListener('scroll', dismissGuide);
+      }
+      window.addEventListener('scroll', dismissGuide, { passive: true });
+
+      /* ── Scroll reveal ──────────────────────────────── */
+      var revealEls = document.querySelectorAll('.reveal');
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.12 });
+
+        revealEls.forEach(function (el) { io.observe(el); });
+      } else {
+        // Fallback: show everything
+        revealEls.forEach(function (el) { el.classList.add('visible'); });
+      }
+
+      /* ── Timeline dots + fill ───────────────────────── */
+      var timelineFill = document.querySelector('.timeline-fill');
+      var timelineDots = document.querySelectorAll('.timeline-dot');
+      var sectionEls = document.querySelectorAll('[data-section-index]');
+
+      function updateTimeline() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        var docH = document.documentElement.scrollHeight;
+        var winH = window.innerHeight;
+        var pct = docH > winH ? (scrollY / (docH - winH)) * 100 : 0;
+        if (timelineFill) timelineFill.style.height = Math.min(pct, 100) + '%';
+
+        sectionEls.forEach(function (sec) {
+          var idx = sec.getAttribute('data-section-index');
+          var rect = sec.getBoundingClientRect();
+          var mid = rect.top + rect.height / 2;
+          var dot = document.querySelector('.timeline-dot[data-section="' + idx + '"]');
+          if (dot) {
+            if (mid < winH * 0.65) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
+          }
+        });
+      }
+
+      window.addEventListener('scroll', updateTimeline, { passive: true });
+      updateTimeline();
+
+      /* ── Card flip ──────────────────────────────────── */
+      document.querySelectorAll('.index-card-inner').forEach(function (card) {
+        function flip() {
+          card.classList.toggle('flipped');
+          var back = card.querySelector('.index-card-back');
+          if (back) back.setAttribute('aria-hidden', !card.classList.contains('flipped') ? 'true' : 'false');
+        }
+        card.addEventListener('click', flip);
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            flip();
+          }
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>

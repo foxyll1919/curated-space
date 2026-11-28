@@ -151,7 +151,7 @@ export function UploadSurface({ onAccepted }: UploadSurfaceProps) {
               Don&apos;t analyze
             </Label>
             <p id="skip-analysis-description" className="max-w-[26ch] text-xs text-muted-foreground">
-              Keeps it on your machine, sent to no AI provider.
+              Saves without AI analysis — not sent to any provider.
             </p>
           </div>
           <ShieldIcon aria-hidden="true" className="mt-0.5 hidden size-4 text-muted-foreground sm:block" />

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#F7F4EE" id="theme-color" />
+  <title>Curated Space</title>
+  <meta name="description" content="A personal screenshot library. Drop screenshots, let AI extract titles, descriptions and tags, then search everything you've saved. Powered by Gemini." />
+  <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Tokens ──────────────────────────────────────────── */
+    :root {
+      --bg: #F7F4EE;
+      --fg: #2F3061;
+      --card: #FFFFFF;
+      --orchid: #C77DBA;
+      --border: #D8D3C8;
+      --muted: #6B6B8D;
+      --secondary: #EDE9E0;
+      --surface: #FFFFFF;
+      --ruled-line: #C8D4E8;
+      --card-bg: #FFFEF8;
+      --hole-shadow: #D0C8B8;
+      --toggle-icon: #2F3061;
+
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+
+      color-scheme: light;
+    }
+
+    .dark {
+      --bg: #0F0F13;
+      --fg: #E0E0E6;
+      --card: #17171C;
+      --orchid: #E58CF0;
+      --border: #2A2A33;
+      --muted: #9393A6;
+      --secondary: #1F1F26;
+      --surface: #1F1F26;
+      --ruled-line: #2A2A40;
+      --card-bg: #1A1A22;
+      --hole-shadow: #0A0A10;
+      --toggle-icon: #E0E0E6;
+
+      color-scheme: dark;
+    }
+
+    /* ── Base ────────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-underline-position: from-font;
+      text-decoration-skip-ink: auto;
+    }
+
+    a { color: inherit; }
+
+    ::selection {
+      background: color-mix(in oklch, var(--orchid) 25%, transparent);
+    }
+
+    /* ── Reduced motion ─────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ── Focus ───────────────────────────────────────────── */
+    :focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 2px;
+    }
+
+    /* ── Theme toggle ───────────────────────────────────── */
+    .theme-toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 100;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background-color 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .theme-toggle:hover { border-color: var(--muted); }
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+      color: var(--toggle-icon);
+      pointer-events: none;
+    }
+    .dark .theme-toggle .icon-sun { display: none; }
+    :not(.dark) .theme-toggle .icon-moon { display: none; }
+
+    /* ── Timeline ────────────────────────────────────────── */
+    .timeline {
+      position: fixed;
+      left: 2rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 2px;
+      background: var(--border);
+      opacity: 0.35;
+    }
+    .timeline-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 0%;
+      background: var(--orchid);
+      transition: height 0.1s linear;
+      opacity: 0.65;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .timeline-dot.active {
+      background: var(--orchid);
+      border-color: var(--orchid);
+    }
+    @media (max-width: 768px) {
+      .timeline { display: none; }
+    }
+
+    /* ── Guide tooltip ──────────────────────────────────── */
+    .guide-tooltip {
+      position: fixed;
+      top: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      opacity: 1;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .guide-tooltip.hidden {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    .guide-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orchid);
+      animation: pulse-dot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.5); }
+    }
+
+    /* ── Scroll-reveal ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .stagger > .reveal:nth-child(2) { transition-delay: 150ms; }
+    .stagger > .reveal:nth-child(3) { transition-delay: 300ms; }
+    .stagger > .reveal:nth-child(4) { transition-delay: 450ms; }
+
+    /* ── Exhibition Header ──────────────────────────────── */
+    .hero {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+    .hero-number {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .hero-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 1.5rem;
+    }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+      margin-bottom: 1.25rem;
+    }
+    .hero-rule {
+      width: min(260px, 55%);
+      height: 1px;
+      background: var(--border);
+      border: none;
+      margin: 0 auto 1.5rem;
+    }
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 420px;
+      text-wrap: pretty;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.6rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: translateY(0.5px); }
+    .btn-primary {
+      color: var(--bg);
+      background: var(--fg);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px color-mix(in oklch, var(--fg) 20%, transparent);
+    }
+
+    /* ── Section ─────────────────────────────────────────── */
+    .section {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .section { padding: 3.5rem 1.25rem; }
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Index Cards ─────────────────────────────────────── */
+    .cards {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 0 1rem;
+    }
+    .card-wrap {
+      perspective: 800px;
+      flex-shrink: 0;
+    }
+    .card-wrap:nth-child(1) { transform: rotate(-3deg) translateY(6px); z-index: 1; margin-right: -20px; }
+    .card-wrap:nth-child(2) { z-index: 2; }
+    .card-wrap:nth-child(3) { transform: rotate(2.5deg) translateY(10px); z-index: 1; margin-left: -20px; }
+
+    .card-flip {
+      width: 272px;
+      height: 370px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease;
+      cursor: pointer;
+    }
+    .card-flip.flipped { transform: rotateY(180deg); }
+    .card-flip:hover { transform: translateY(-4px); }
+    .card-flip.flipped:hover { transform: rotateY(180deg) translateY(-4px); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .card-front {
+      background: var(--card-bg);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+      background-image:
+        repeating-linear-gradient(transparent, transparent 27px, var(--ruled-line) 27px, var(--ruled-line) 28px);
+      background-position: 0 96px;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-back {
+      background: var(--card-bg);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 0.75rem;
+    }
+
+    .card-hole {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      margin: 13px auto 0;
+      box-shadow: inset 0 1px 2px var(--hole-shadow);
+      flex-shrink: 0;
+    }
+    .card-accent {
+      width: calc(100% - 2.5rem);
+      height: 2px;
+      background: var(--orchid);
+      margin: 10px auto 0;
+      border-radius: 1px;
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+    .card-body {
+      padding: 1.1rem 1.4rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-num {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .card-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.45rem;
+      line-height: 1.2;
+      margin-bottom: 0.65rem;
+    }
+    .card-desc {
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+    .card-hint {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--muted);
+      opacity: 0.45;
+      margin-top: auto;
+      text-align: right;
+      padding-top: 0.5rem;
+    }
+
+    /* Card back illustrations */
+    .back-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .back-dropzone {
+      width: 110px;
+      height: 90px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+    .back-dropzone svg {
+      width: 22px;
+      height: 22px;
+      color: var(--muted);
+    }
+    .back-shimmer {
+      width: 130px;
+      height: 72px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s ease-in-out infinite;
+    }
+    .back-shimmer-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      width: 130px;
+    }
+    .back-shimmer-line {
+      height: 5px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s ease-in-out infinite;
+    }
+    .back-shimmer-line:nth-child(2) { width: 75%; animation-delay: 0.2s; }
+    .back-shimmer-line:nth-child(3) { width: 50%; animation-delay: 0.4s; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .back-search {
+      width: 150px;
+      height: 34px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 7px;
+    }
+    .back-search svg {
+      width: 14px;
+      height: 14px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .back-cursor {
+      width: 1.5px;
+      height: 15px;
+      background: var(--orchid);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .back-results {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 150px;
+    }
+    .back-result {
+      height: 22px;
+      border-radius: 4px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* Mobile stacking */
+    @media (max-width: 768px) {
+      .cards {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+      }
+      .card-wrap:nth-child(1),
+      .card-wrap:nth-child(2),
+      .card-wrap:nth-child(3) {
+        transform: none;
+        margin: 0;
+        z-index: 1;
+      }
+      .card-flip {
+        width: min(272px, 85vw);
+        height: 350px;
+      }
+    }
+
+    /* ── Museum Labels ──────────────────────────────────── */
+    .labels {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+    .label {
+      max-width: 520px;
+      padding-left: 1.25rem;
+      border-left: 2px solid var(--border);
+      transition: transform 0.25s ease;
+    }
+    .label:hover { transform: scale(1.015); }
+    .label:nth-child(even) { margin-left: auto; }
+    .label-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.5rem;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+      text-wrap: balance;
+    }
+    .label-desc {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      text-wrap: pretty;
+    }
+    .label-medium {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+    @media (max-width: 768px) {
+      .label:nth-child(even) { margin-left: 0; }
+      .label { max-width: 100%; }
+    }
+
+    /* ── Visitor Book ───────────────────────────────────── */
+    .cta {
+      text-align: center;
+      padding: 4.5rem 1.5rem 3.5rem;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .cta-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .cta-line { width: 36px; height: 1px; background: var(--border); }
+    .cta-diamond {
+      width: 7px;
+      height: 7px;
+      background: var(--orchid);
+      transform: rotate(45deg);
+      opacity: 0.55;
+    }
+    .cta-heading {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      line-height: 1.2;
+      text-wrap: balance;
+      margin-bottom: 0.75rem;
+    }
+    .cta-sub {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      text-wrap: pretty;
+    }
+    .cta-fine {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      opacity: 0.55;
+      margin-top: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── AI Ethics ──────────────────────────────────────── */
+    .ethics {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+      text-align: center;
+    }
+    .ethics-heading {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+      text-wrap: balance;
+    }
+    .ethics-body {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+    .ethics-body a {
+      text-decoration: underline;
+      text-decoration-color: var(--orchid);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1.5px;
+      transition: color 0.15s;
+    }
+    .ethics-body a:hover { color: var(--fg); }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem 2.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .footer-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer-logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+    }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .footer-sep {
+      color: var(--border);
+      font-size: 0.6rem;
+      user-select: none;
+    }
+    .footer-link {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--fg); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Theme toggle ──────────────────────────────────── -->
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+
+  <!-- ── Timeline ──────────────────────────────────────── -->
+  <div class="timeline" aria-hidden="true">
+    <div class="timeline-fill" id="tl-fill"></div>
+    <div class="timeline-dot" data-sec="0" style="top:12%"></div>
+    <div class="timeline-dot" data-sec="1" style="top:32%"></div>
+    <div class="timeline-dot" data-sec="2" style="top:54%"></div>
+    <div class="timeline-dot" data-sec="3" style="top:72%"></div>
+    <div class="timeline-dot" data-sec="4" style="top:88%"></div>
+  </div>
+
+  <!-- ── Guide ─────────────────────────────────────────── -->
+  <div class="guide-tooltip" id="guide" role="status" aria-live="polite">
+    <span class="guide-dot"></span>
+    Scroll to explore the exhibition
+  </div>
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero" data-si="0">
+    <span class="hero-number reveal">NO. 001 — PERSONAL KNOWLEDGE LIBRARY</span>
+    <img src="/favicon.jpg" alt="Curated Space" class="hero-logo reveal" width="60" height="60" fetchpriority="high" />
+    <h1 class="hero-title reveal">Curated Space</h1>
+    <hr class="hero-rule reveal" />
+    <p class="hero-subtitle reveal">A personal library for your visual references, powered by AI.</p>
+    <a href="/login" class="btn btn-primary reveal">Enter the library →</a>
+  </header>
+
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section class="section" data-si="1" aria-labelledby="how-label">
+    <p class="section-label reveal" id="how-label">HOW IT WORKS</p>
+    <div class="cards stagger">
+
+      <!-- Card 1 -->
+      <div class="card-wrap reveal">
+        <div class="card-flip" role="button" tabindex="0" aria-label="Drop it in — press to see illustration">
+          <div class="card-face card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent"></div>
+            <div class="card-body">
+              <span class="card-num">NO. 001</span>
+              <h3 class="card-title">Drop it in</h3>
+              <p class="card-desc">Screenshots arrive by drop, paste, or file pick. Each one is stored and catalogued.</p>
+              <span class="card-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="card-face card-back" aria-hidden="true">
+            <div class="back-dropzone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <span class="back-label">DRAG &amp; DROP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card-wrap reveal">
+        <div class="card-flip" role="button" tabindex="0" aria-label="AI catalogues it — press to see illustration">
+          <div class="card-face card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent"></div>
+            <div class="card-body">
+              <span class="card-num">NO. 002</span>
+              <h3 class="card-title">AI catalogues it</h3>
+              <p class="card-desc">Gemini reads your screenshot and writes a title, description, and tags.</p>
+              <span class="card-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="card-face card-back" aria-hidden="true">
+            <div class="back-shimmer"></div>
+            <div class="back-shimmer-lines">
+              <div class="back-shimmer-line"></div>
+              <div class="back-shimmer-line"></div>
+              <div class="back-shimmer-line"></div>
+            </div>
+            <span class="back-label">EXTRACTING…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card-wrap reveal">
+        <div class="card-flip" role="button" tabindex="0" aria-label="Find it again — press to see illustration">
+          <div class="card-face card-front">
+            <div class="card-hole"></div>
+            <div class="card-accent"></div>
+            <div class="card-body">
+              <span class="card-num">NO. 003</span>
+              <h3 class="card-title">Find it again</h3>
+              <p class="card-desc">Full-text search, semantic search, or just ask a question in plain English.</p>
+              <span class="card-hint">click to flip ↻</span>
+            </div>
+          </div>
+          <div class="card-face card-back" aria-hidden="true">
+            <div class="back-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <div class="back-cursor"></div>
+            </div>
+            <div class="back-results">
+              <div class="back-result"></div>
+              <div class="back-result"></div>
+              <div class="back-result"></div>
+            </div>
+            <span class="back-label">SEARCH</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section class="section" data-si="2" aria-labelledby="feat-label">
+    <p class="section-label reveal" id="feat-label">THE COLLECTION</p>
+    <div class="labels stagger">
+
+      <article class="label reveal">
+        <h3 class="label-name">Your Personal Archive</h3>
+        <p class="label-desc">Every screenshot is securely stored in your account. Only you can see, search, and manage your collection.</p>
+        <span class="label-medium">Medium: Encrypted sessions &amp; per-account isolation</span>
+      </article>
+
+      <article class="label reveal">
+        <h3 class="label-name">The Ask Room</h3>
+        <p class="label-desc">Ask your library questions in plain English. Answers cite the original screenshots so you can verify every claim.</p>
+        <span class="label-medium">Medium: Retrieval-augmented generation</span>
+      </article>
+
+      <article class="label reveal">
+        <h3 class="label-name">The Catalogue</h3>
+        <p class="label-desc">Every screenshot is titled, described, and tagged automatically. Corrections are yours to make at any time.</p>
+        <span class="label-medium">Medium: Structured metadata extraction</span>
+      </article>
+
+      <article class="label reveal">
+        <h3 class="label-name">Responsible AI</h3>
+        <p class="label-desc">Screenshots are sent to Gemini only for analysis — never for model training. You can skip analysis entirely for sensitive screenshots.</p>
+        <span class="label-medium">Medium: Gemini API with data-use safeguards</span>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta" id="cta" data-si="3" aria-label="Get started">
+    <div class="cta-ornament reveal">
+      <div class="cta-line"></div>
+      <div class="cta-diamond"></div>
+      <div class="cta-line"></div>
+    </div>
+    <h2 class="cta-heading reveal">Sign the visitor book to begin your collection.</h2>
+    <p class="cta-sub reveal">Every screenshot you save becomes a permanent entry in your personal archive.</p>
+    <a href="/login" class="btn btn-primary reveal">Create your account →</a>
+    <p class="cta-fine reveal">Free to use · No credit card required</p>
+  </section>
+
+  <!-- ═══ AI ETHICS ═══ -->
+  <section class="ethics" data-si="4" aria-labelledby="ethics-h">
+    <h3 class="ethics-heading reveal" id="ethics-h">A note on AI and your screenshots</h3>
+    <p class="ethics-body reveal">
+      Curated Space uses Google Gemini to read your screenshots and extract titles, descriptions and tags.
+      Screenshots are sent to the Gemini API for analysis only&nbsp;— they are not used to train models.
+      You can save any screenshot without analysis by toggling "Don't analyze," and it will never be sent to any AI&nbsp;provider.
+      Review Google's <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini&nbsp;API&nbsp;terms</a>
+      and <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer">billing&nbsp;tiers</a> for complete data-handling details.
+    </p>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-row">
+        <img src="/favicon.jpg" alt="" class="footer-logo" width="18" height="18" loading="lazy" />
+        <span class="footer-text">© 2026 Curated Space</span>
+      </div>
+      <div class="footer-row">
+        <a href="https://github.com/foxyll1919/curated-space" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <a href="/login" class="footer-link">Sign in</a>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <a href="https://ai.google.dev/gemini-api/terms" class="footer-link" target="_blank" rel="noopener noreferrer">AI terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── Theme ────────────────────────────────────────── */
+      var html = document.documentElement;
+      var btn = document.getElementById('theme-toggle');
+      var meta = document.getElementById('theme-color');
+
+      function setTheme(dark) {
+        html.classList.toggle('dark', dark);
+        if (meta) meta.content = dark ? '#0F0F13' : '#F7F4EE';
+        btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        try { localStorage.setItem('cs-landing-theme', dark ? 'dark' : 'light'); } catch (e) {}
+      }
+
+      (function init() {
+        var s;
+        try { s = localStorage.getItem('cs-landing-theme'); } catch (e) {}
+        if (s === 'dark') return setTheme(true);
+        if (s === 'light') return setTheme(false);
+        setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      })();
+
+      btn.addEventListener('click', function () {
+        setTheme(!html.classList.contains('dark'));
+      });
+
+      /* ── Guide ────────────────────────────────────────── */
+      var guide = document.getElementById('guide');
+      var guided = false;
+      function hideGuide() {
+        if (guided) return;
+        guided = true;
+        guide.classList.add('hidden');
+        window.removeEventListener('scroll', hideGuide);
+      }
+      window.addEventListener('scroll', hideGuide, { passive: true });
+
+      /* ── Reveal ───────────────────────────────────────── */
+      var els = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].isIntersecting) {
+              entries[i].target.classList.add('visible');
+              io.unobserve(entries[i].target);
+            }
+          }
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        for (var i = 0; i < els.length; i++) io.observe(els[i]);
+      } else {
+        for (var i = 0; i < els.length; i++) els[i].classList.add('visible');
+      }
+
+      /* ── Timeline ─────────────────────────────────────── */
+      var fill = document.getElementById('tl-fill');
+      var dots = document.querySelectorAll('.timeline-dot');
+      var secs = document.querySelectorAll('[data-si]');
+
+      function tick() {
+        var y = window.scrollY;
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = h > 0 ? (y / h) * 100 : 0;
+        if (fill) fill.style.height = Math.min(pct, 100) + '%';
+
+        for (var i = 0; i < secs.length; i++) {
+          var r = secs[i].getBoundingClientRect();
+          var mid = r.top + r.height / 2;
+          var d = document.querySelector('.timeline-dot[data-sec="' + secs[i].getAttribute('data-si') + '"]');
+          if (d) d.classList.toggle('active', mid < window.innerHeight * 0.6);
+        }
+      }
+      window.addEventListener('scroll', tick, { passive: true });
+      tick();
+
+      /* ── Card flip ────────────────────────────────────── */
+      var cards = document.querySelectorAll('.card-flip');
+      for (var c = 0; c < cards.length; c++) {
+        (function (card) {
+          function flip() {
+            card.classList.toggle('flipped');
+            var back = card.querySelector('.card-back');
+            if (back) back.setAttribute('aria-hidden', card.classList.contains('flipped') ? 'false' : 'true');
+          }
+          card.addEventListener('click', flip);
+          card.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }
+          });
+        })(cards[c]);
+      }
+
+    })();
+  </script>
+</body>
+</html>

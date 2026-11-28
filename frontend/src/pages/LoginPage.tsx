@@ -119,7 +119,7 @@ export function LoginPage() {
           </h1>
           <p className="mt-2 text-sm text-pretty text-muted-foreground">
             {isCreate
-              ? 'This library is private. One account owns the screenshots, and nothing leaves your machine without it.'
+              ? 'This library is private. One account owns the screenshots, and nothing is shared without your permission.'
               : 'Your screenshot library is waiting.'}
           </p>
 

@@ -67,7 +67,7 @@ function AnswerBlock({ text }: { text: string }) {
           return (
             <div key={i} className="flex gap-2 pl-2">
               <span className="mt-[11px] size-1 shrink-0 rounded-full bg-muted-foreground" />
-              <MarkdownText text={bullet[1]} />
+              <MarkdownText text={bullet[1]!} />
             </div>
           )
         }
@@ -78,7 +78,7 @@ function AnswerBlock({ text }: { text: string }) {
               <span className="mt-0.5 shrink-0 text-xs font-medium text-muted-foreground">
                 {numbered[1]}.
               </span>
-              <MarkdownText text={numbered[2]} />
+              <MarkdownText text={numbered[2]!} />
             </div>
           )
         }

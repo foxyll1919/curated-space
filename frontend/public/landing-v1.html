@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#F7F4EE" id="theme-color" />
+  <title>Curated Space — Your screenshots, remembered.</title>
+  <meta name="description" content="A personal screenshot library. Drop screenshots, let AI extract knowledge, search everything you've saved. Powered by Gemini." />
+  <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Tokens ────────────────────────────────────────── */
+    :root {
+      --bg: #F7F4EE;
+      --fg: #2F3061;
+      --card: #FFFFFF;
+      --orchid: #C77DBA;
+      --border: #D8D3C8;
+      --muted: #6B6B8D;
+      --secondary: #EDE9E0;
+
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+
+      color-scheme: light;
+    }
+
+    .dark {
+      --bg: #0F0F13;
+      --fg: #E0E0E6;
+      --card: #17171C;
+      --orchid: #E58CF0;
+      --border: #2A2A33;
+      --muted: #9393A6;
+      --secondary: #1F1F26;
+
+      color-scheme: dark;
+    }
+
+    /* ── Base ──────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* ── Scroll progress ──────────────────────────────── */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 1px;
+      width: 0%;
+      background: var(--orchid);
+      z-index: 1000;
+      transition: none;
+    }
+
+    /* ── Theme toggle ─────────────────────────────────── */
+    .theme-toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 999;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: background 0.3s, border-color 0.3s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .theme-toggle:hover { transform: scale(1.08); }
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--fg);
+      outline-offset: 2px;
+    }
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon { pointer-events: none; }
+    .theme-toggle .icon-sun { display: none; }
+    .dark .theme-toggle .icon-sun { display: block; }
+    .dark .theme-toggle .icon-moon { display: none; }
+    :not(.dark) .theme-toggle .icon-moon { display: none; }
+    :not(.dark) .theme-toggle .icon-sun { display: none; }
+
+    /* Show correct icon */
+    .theme-toggle .icon-moon { display: block; }
+    .dark .theme-toggle .icon-moon { display: none; }
+    .dark .theme-toggle .icon-sun { display: block; }
+
+    /* ── Scroll hint ──────────────────────────────────── */
+    .scroll-hint {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 998;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+    .scroll-hint.hidden { opacity: 0; }
+    .scroll-hint-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orchid);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .scroll-hint-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    /* ── Sections ─────────────────────────────────────── */
+    .section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 1.5rem;
+      position: relative;
+    }
+
+    .section-inner {
+      max-width: 56rem;
+      width: 100%;
+    }
+
+    /* ── Reveal animation ─────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(2rem);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Typography ────────────────────────────────────── */
+    .heading-serif {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    .label-mono {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .body-text {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      line-height: 1.65;
+      text-wrap: pretty;
+      color: var(--muted);
+    }
+
+    /* ── Hero ──────────────────────────────────────────── */
+    .hero { min-height: 100vh; text-align: center; }
+
+    .hero-logo {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 1rem;
+      object-fit: cover;
+      margin-bottom: 2.5rem;
+      animation: float 6s ease-in-out infinite;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    }
+    .dark .hero-logo {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero-title {
+      font-size: clamp(3.5rem, 10vw, 7.5rem);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-size: clamp(1.125rem, 2.5vw, 1.375rem);
+      font-weight: 400;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      text-wrap: balance;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 2rem;
+      background: var(--fg);
+      color: var(--bg);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .dark .hero-cta:hover {
+      box-shadow: 0 4px 20px rgba(255,255,255,0.08);
+    }
+    .hero-cta:focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 3px;
+    }
+
+    .hero-label {
+      margin-top: 3.5rem;
+    }
+
+    /* ── How It Works ─────────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4rem;
+    }
+    @media (min-width: 48rem) {
+      .steps { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+    }
+
+    .step {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-number {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orchid);
+      margin-bottom: 1.5rem;
+      min-height: 1.1em;
+    }
+
+    .step-visual {
+      width: 7rem;
+      height: 7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    /* Step 1: Drop zone */
+    .drop-zone-visual {
+      width: 100%;
+      height: 100%;
+      border: 2px dashed var(--border);
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s;
+    }
+    .drop-zone-visual svg {
+      width: 2rem;
+      height: 2rem;
+      color: var(--muted);
+    }
+
+    /* Step 2: Shimmer */
+    .shimmer-visual {
+      width: 100%;
+      height: 100%;
+      border-radius: 0.75rem;
+      background: var(--secondary);
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-visual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        100deg,
+        transparent 20%,
+        rgba(128,128,128,0.08) 45%,
+        transparent 70%
+      );
+      background-size: 220% 100%;
+      animation: shimmer 2.4s linear infinite;
+    }
+    .shimmer-visual .shimmer-lines {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .shimmer-line {
+      height: 0.5rem;
+      border-radius: 0.25rem;
+      background: var(--border);
+    }
+    .shimmer-line:nth-child(1) { width: 80%; }
+    .shimmer-line:nth-child(2) { width: 60%; }
+    .shimmer-line:nth-child(3) { width: 70%; }
+    .shimmer-line:nth-child(4) { width: 45%; }
+
+    @keyframes shimmer {
+      from { background-position: 140% 0; }
+      to { background-position: -60% 0; }
+    }
+
+    /* Step 3: Search icon */
+    .search-visual {
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .search-visual svg {
+      width: 2.25rem;
+      height: 2.25rem;
+      color: var(--muted);
+    }
+
+    .step-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.375rem;
+      margin-bottom: 0.5rem;
+    }
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-wrap: pretty;
+      max-width: 18rem;
+    }
+
+    .how-heading {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      margin-bottom: 4rem;
+      text-align: center;
+    }
+
+    /* ── Marquee ───────────────────────────────────────── */
+    .marquee-section {
+      min-height: auto;
+      padding: 3rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 30s linear infinite;
+    }
+    .marquee-item {
+      flex-shrink: 0;
+      padding: 0 2rem;
+      font-family: var(--font-sans);
+      font-size: clamp(0.875rem, 1.5vw, 1rem);
+      font-weight: 500;
+      white-space: nowrap;
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .marquee-item::after {
+      content: '·';
+      color: var(--muted);
+      font-size: 1.25em;
+    }
+    .marquee-item:last-child::after {
+      content: '·';
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── Ask Section ──────────────────────────────────── */
+    .ask-section .section-inner {
+      text-align: center;
+    }
+    .ask-heading {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      margin-bottom: 1.5rem;
+    }
+    .ask-desc {
+      font-size: clamp(1rem, 2vw, 1.125rem);
+      max-width: 36rem;
+      margin: 0 auto 2.5rem;
+    }
+    .ask-visual {
+      max-width: 28rem;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: var(--card);
+    }
+    .ask-input-mock {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      color: var(--muted);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .ask-input-mock svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+      opacity: 0.5;
+    }
+    .ask-answer-mock {
+      padding: 1.25rem;
+      text-align: left;
+    }
+    .ask-answer-line {
+      height: 0.45rem;
+      border-radius: 0.25rem;
+      background: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+    .ask-answer-line:nth-child(1) { width: 90%; }
+    .ask-answer-line:nth-child(2) { width: 75%; }
+    .ask-answer-line:nth-child(3) { width: 82%; }
+    .ask-answer-line:nth-child(4) { width: 55%; }
+    .ask-answer-cite {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--orchid);
+      border: 1px solid var(--orchid);
+      border-radius: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      opacity: 0.8;
+    }
+
+    /* ── Privacy Section ──────────────────────────────── */
+    .privacy-section .section-inner {
+      text-align: center;
+    }
+    .privacy-heading {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: 1.5rem;
+    }
+    .privacy-desc {
+      font-size: clamp(1rem, 2vw, 1.125rem);
+      max-width: 32rem;
+      margin: 0 auto 3rem;
+    }
+
+    .shield {
+      width: 5rem;
+      height: 6rem;
+      margin: 0 auto;
+      position: relative;
+    }
+    .shield-body {
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--border);
+      border-radius: 0.5rem 0.5rem 2.5rem 2.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shield-check {
+      width: 1.5rem;
+      height: 1rem;
+      border-left: 2px solid var(--fg);
+      border-bottom: 2px solid var(--fg);
+      transform: rotate(-45deg);
+      margin-top: -0.25rem;
+    }
+
+    /* ── Footer CTA ───────────────────────────────────── */
+    .footer-cta-section {
+      min-height: 70vh;
+      text-align: center;
+    }
+    .footer-heading {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      margin-bottom: 2.5rem;
+    }
+    .footer-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2.5rem;
+      background: var(--fg);
+      color: var(--bg);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .footer-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .dark .footer-btn:hover {
+      box-shadow: 0 4px 20px rgba(255,255,255,0.08);
+    }
+    .footer-btn:focus-visible {
+      outline: 2px solid var(--orchid);
+      outline-offset: 3px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    footer p {
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    /* ── Reduced motion ───────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+      .marquee-track {
+        animation: none;
+      }
+    }
+
+    /* ── Typewriter for step numbers ──────────────────── */
+    .step-number-text {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 0;
+      transition: none;
+    }
+    .step-number-text.typed {
+      width: auto;
+    }
+
+    /* ── Separator ─────────────────────────────────────── */
+    .section-sep {
+      display: block;
+      width: 1px;
+      height: 6rem;
+      background: var(--border);
+      margin: 0 auto;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Scroll progress bar -->
+  <div class="scroll-progress" role="progressbar" aria-label="Page scroll progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+
+  <!-- Theme toggle -->
+  <button class="theme-toggle" aria-label="Toggle dark mode" type="button">
+    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="4.22" x2="19.78" y2="5.64"/></svg>
+  </button>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" aria-hidden="true">
+    <span class="scroll-hint-label">Scroll</span>
+    <span class="scroll-hint-dot"></span>
+  </div>
+
+  <main>
+    <!-- ═══ HERO ═══ -->
+    <section class="section hero" aria-label="Introduction">
+      <div class="section-inner reveal" style="display:flex;flex-direction:column;align-items:center;">
+        <img src="/favicon.jpg" alt="Curated Space logo" class="hero-logo" width="72" height="72" />
+        <h1 class="heading-serif hero-title">Curated Space</h1>
+        <p class="hero-tagline">Your screenshots, remembered.</p>
+        <a href="/login" class="hero-cta">Start your library <span aria-hidden="true">→</span></a>
+        <p class="label-mono hero-label">NO. 001 — PERSONAL KNOWLEDGE LIBRARY</p>
+      </div>
+    </section>
+
+    <!-- ═══ HOW IT WORKS ═══ -->
+    <section class="section" aria-label="How it works">
+      <div class="section-inner">
+        <h2 class="heading-serif how-heading reveal">How it works</h2>
+        <div class="steps">
+          <!-- Step 1 -->
+          <div class="step reveal" data-step="1">
+            <span class="step-number label-mono" aria-label="Step 1"><span class="step-number-text" data-typewriter="NO. 001"></span></span>
+            <div class="step-visual">
+              <div class="drop-zone-visual">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </div>
+            </div>
+            <h3 class="step-title">Drop a screenshot</h3>
+            <p class="step-desc body-text">Drag, paste, or upload any screenshot. That's all it takes.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step reveal" data-step="2">
+            <span class="step-number label-mono" aria-label="Step 2"><span class="step-number-text" data-typewriter="NO. 002"></span></span>
+            <div class="step-visual">
+              <div class="shimmer-visual">
+                <div class="shimmer-lines">
+                  <div class="shimmer-line"></div>
+                  <div class="shimmer-line"></div>
+                  <div class="shimmer-line"></div>
+                  <div class="shimmer-line"></div>
+                </div>
+              </div>
+            </div>
+            <h3 class="step-title">AI reads it for you</h3>
+            <p class="step-desc body-text">Gemini extracts titles, descriptions, and tags automatically.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step reveal" data-step="3">
+            <span class="step-number label-mono" aria-label="Step 3"><span class="step-number-text" data-typewriter="NO. 003"></span></span>
+            <div class="step-visual">
+              <div class="search-visual">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+            </div>
+            <h3 class="step-title">Search everything</h3>
+            <p class="step-desc body-text">Full-text, semantic, or just browse the masonry grid.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FEATURE MARQUEE ═══ -->
+    <section class="marquee-section" aria-label="Features">
+      <div class="marquee-track" aria-hidden="true">
+        <span class="marquee-item">Title extraction</span>
+        <span class="marquee-item">Tag generation</span>
+        <span class="marquee-item">Full-text search</span>
+        <span class="marquee-item">Semantic search</span>
+        <span class="marquee-item">RAG answers</span>
+        <span class="marquee-item">Private by default</span>
+        <span class="marquee-item">Account-isolated</span>
+        <span class="marquee-item">Secure by default</span>
+        <span class="marquee-item">Title extraction</span>
+        <span class="marquee-item">Tag generation</span>
+        <span class="marquee-item">Full-text search</span>
+        <span class="marquee-item">Semantic search</span>
+        <span class="marquee-item">RAG answers</span>
+        <span class="marquee-item">Private by default</span>
+        <span class="marquee-item">Account-isolated</span>
+        <span class="marquee-item">Secure by default</span>
+      </div>
+      <!-- Accessible text for screen readers -->
+      <p class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Features: Title extraction, Tag generation, Full-text search, Semantic search, RAG answers, Private by default, Account-isolated, Secure by default.</p>
+    </section>
+
+    <!-- ═══ ASK SECTION ═══ -->
+    <section class="section ask-section" aria-label="Ask your library">
+      <div class="section-inner reveal">
+        <h2 class="heading-serif ask-heading">Ask your library anything.</h2>
+        <p class="body-text ask-desc">Every screenshot you save becomes searchable knowledge. Ask a question and get grounded answers with citations — straight from your own collection.</p>
+        <div class="ask-visual" aria-hidden="true">
+          <div class="ask-input-mock">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>What were the API rate limits I saved last week?</span>
+          </div>
+          <div class="ask-answer-mock">
+            <div class="ask-answer-line"></div>
+            <div class="ask-answer-line"></div>
+            <div class="ask-answer-line"></div>
+            <div class="ask-answer-line"></div>
+            <span class="ask-answer-cite">Source: screenshot-0042</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep" aria-hidden="true"></div>
+
+    <!-- ═══ PRIVACY ═══ -->
+    <section class="section privacy-section" aria-label="Privacy">
+      <div class="section-inner reveal">
+        <h2 class="heading-serif privacy-heading">Your screenshots are yours alone.</h2>
+        <p class="body-text privacy-desc">Each account is isolated. Screenshots are only sent to Gemini for analysis — you can skip that for sensitive images. No analytics, no tracking.</p>
+        <div class="shield" aria-hidden="true">
+          <div class="shield-body">
+            <div class="shield-check"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep" aria-hidden="true"></div>
+
+    <!-- ═══ FOOTER CTA ═══ -->
+    <section class="section footer-cta-section" aria-label="Get started">
+      <div class="section-inner reveal" style="display:flex;flex-direction:column;align-items:center;">
+        <h2 class="heading-serif footer-heading">Ready to start curating?</h2>
+        <a href="/login" class="footer-btn">Start your library <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with care.</p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── Dark mode ───────────────────────────────────── */
+      var html = document.documentElement;
+      var toggle = document.querySelector('.theme-toggle');
+      var metaTheme = document.getElementById('theme-color');
+
+      function applyTheme(dark) {
+        html.classList.toggle('dark', dark);
+        if (metaTheme) metaTheme.setAttribute('content', dark ? '#0F0F13' : '#F7F4EE');
+        try { localStorage.setItem('cs-theme', dark ? 'dark' : 'light'); } catch (e) {}
+      }
+
+      // Initial: saved preference → system preference
+      var saved = null;
+      try { saved = localStorage.getItem('cs-theme'); } catch (e) {}
+      if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved === 'dark');
+      } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+
+      toggle.addEventListener('click', function () {
+        applyTheme(!html.classList.contains('dark'));
+      });
+
+      // Respond to OS changes if no saved preference
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        try { if (localStorage.getItem('cs-theme')) return; } catch (err) {}
+        applyTheme(e.matches);
+      });
+
+      /* ── Scroll progress ─────────────────────────────── */
+      var progressBar = document.querySelector('.scroll-progress');
+
+      function updateProgress() {
+        var scrollTop = window.scrollY || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = pct + '%';
+        progressBar.setAttribute('aria-valuenow', Math.round(pct));
+      }
+
+      /* ── Scroll hint ─────────────────────────────────── */
+      var scrollHint = document.querySelector('.scroll-hint');
+      var hintDismissed = false;
+
+      function dismissHint() {
+        if (!hintDismissed && window.scrollY > 60) {
+          hintDismissed = true;
+          scrollHint.classList.add('hidden');
+        }
+      }
+
+      /* ── Combined scroll handler ─────────────────────── */
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (!ticking) {
+          requestAnimationFrame(function () {
+            updateProgress();
+            dismissHint();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+
+      /* ── Reveal on scroll (IntersectionObserver) ─────── */
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!reducedMotion) {
+        var reveals = document.querySelectorAll('.reveal');
+        var revealObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        reveals.forEach(function (el) { revealObserver.observe(el); });
+      } else {
+        // No animation — show everything
+        document.querySelectorAll('.reveal').forEach(function (el) {
+          el.classList.add('visible');
+        });
+      }
+
+      /* ── Typewriter for step numbers ─────────────────── */
+      var typewriterEls = document.querySelectorAll('[data-typewriter]');
+
+      if (!reducedMotion) {
+        var typeObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var el = entry.target;
+              var text = el.getAttribute('data-typewriter');
+              var i = 0;
+              el.style.width = 'auto';
+              el.textContent = '';
+
+              function typeChar() {
+                if (i < text.length) {
+                  el.textContent += text[i];
+                  i++;
+                  setTimeout(typeChar, 60 + Math.random() * 40);
+                }
+              }
+              typeChar();
+              el.classList.add('typed');
+              typeObserver.unobserve(el);
+            }
+          });
+        }, { threshold: 0.5 });
+
+        typewriterEls.forEach(function (el) { typeObserver.observe(el); });
+      } else {
+        typewriterEls.forEach(function (el) {
+          el.textContent = el.getAttribute('data-typewriter');
+          el.classList.add('typed');
+        });
+      }
+
+      // Initial progress
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>
